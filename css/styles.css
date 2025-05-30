@@ -1,0 +1,517 @@
+/* CSS Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: radial-gradient(ellipse at top, #0f172a 0%, #020617 100%);
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    color: #f8fafc;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+/* Main Container */
+.container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: clamp(20px, 4vw, 40px);
+    max-width: 1600px;
+    width: 100%;
+    padding: clamp(16px, 3vw, 32px);
+    align-items: start;
+}
+
+/* Canvas Section - Simplified */
+.canvas-container {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(148, 163, 184, 0.05);
+    backdrop-filter: blur(8px);
+}
+
+/* Canvas Inner Enhancement - Clean and minimal */
+canvas {
+    background: transparent !important;
+    position: relative;
+    z-index: 2;
+    border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+canvas:active {
+    cursor: grabbing;
+}
+
+canvas:hover {
+    filter: brightness(1.02);
+}
+
+/* Enhanced Controls Panel */
+.controls {
+    width: 380px;
+    background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(148, 163, 184, 0.1);
+    backdrop-filter: blur(12px);
+    max-height: 85vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.controls-header {
+    padding: 24px 24px 0;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 139, 34, 0.1));
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.controls-title {
+    font-size: 18px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6, #228b22);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+}
+
+.controls-subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 16px;
+}
+
+.controls-content {
+    padding: 24px;
+    overflow-y: auto;
+    height: calc(85vh - 120px);
+}
+
+/* Custom Scrollbar */
+.controls-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.controls-content::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 4px;
+}
+
+.controls-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #3b82f6, #228b22);
+    border-radius: 4px;
+    border: 1px solid rgba(15, 23, 42, 0.3);
+}
+
+.controls-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #3b82f6, #228b22);
+}
+
+/* Control Sections */
+.control-section {
+    margin-bottom: 32px;
+    padding: 20px;
+    background: rgba(30, 41, 59, 0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.control-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #228b22, #32cd32);
+}
+
+.control-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-section h3::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: linear-gradient(135deg, #3b82f6, #228b22);
+    border-radius: 50%;
+}
+
+/* Control Groups */
+.control-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #cbd5e1;
+}
+
+.value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Enhanced Range Inputs */
+input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #1e293b, #334155);
+    outline: none;
+    margin-bottom: 8px;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    position: relative;
+    pointer-events: auto;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #228b22);
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 
+        0 4px 12px rgba(59, 130, 246, 0.4),
+        0 0 0 4px rgba(59, 130, 246, 0.1);
+    transition: all 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 
+        0 6px 16px rgba(59, 130, 246, 0.5),
+        0 0 0 6px rgba(59, 130, 246, 0.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #228b22);
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    -moz-appearance: none;
+}
+
+input[type="range"]::-moz-range-track {
+    background: linear-gradient(90deg, #1e293b, #334155);
+    height: 8px;
+    border-radius: 4px;
+    border: none;
+}
+
+/* Enhanced Buttons */
+button {
+    background: linear-gradient(135deg, #3b82f6, #228b22);
+    color: rgb(255, 255, 255);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 4px 12px rgba(59, 130, 246, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 20px rgba(59, 130, 246, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+button:active {
+    transform: translateY(-1px);
+}
+
+.button-group {
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Legend and Info Sections */
+.legend {
+    background: rgba(30, 41, 59, 0.6);
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 20px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.legend-item {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s ease;
+}
+
+.legend-item:hover {
+    transform: translateX(4px);
+}
+
+.color-box {
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.physics-info {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 139, 34, 0.1));
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 16px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    backdrop-filter: blur(4px);
+}
+
+/* Zoom Controls */
+.zoom-controls {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+}
+
+.zoom-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+}
+
+.zoom-btn:hover {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: scale(1.05);
+}
+
+.zoom-info {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    background: rgba(30, 41, 59, 0.8);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: #cbd5e1;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    backdrop-filter: blur(8px);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .controls {
+        width: 100%;
+        max-width: 500px;
+        justify-self: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .controls {
+        border-radius: 16px;
+        max-height: 60vh;
+    }
+    
+    .canvas-container {
+        border-radius: 12px;
+    }
+    
+    .zoom-controls {
+        top: 12px;
+        right: 12px;
+    }
+    
+    .zoom-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.loading {
+    animation: pulse 2s infinite;
+}
+
+/* Hover Effects */
+.control-section:hover {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Focus States */
+input[type="range"]:focus {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+}
+
+button:focus {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+}
+
+/* ===== SUBTLE CANVAS ENHANCEMENT MODULES ===== */
+
+/* Minimal Canvas Background - Very subtle grid */
+.canvas-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(90deg, rgba(148, 163, 184, 0.01) 1px, transparent 1px),
+        linear-gradient(rgba(148, 163, 184, 0.01) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.5;
+}
+
+/* Subtle Border - No animation, just clean outline */
+.canvas-container::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 17px;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+/* Remove all particle effects and animations */
+.canvas-container .particles,
+.particle {
+    display: none;
+}
+
+/* Minimal hover effect */
+canvas:hover {
+    filter: brightness(1.02);
+    box-shadow: 
+        0 0 20px rgba(59, 130, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Remove corner accents */
+.canvas-corner-accent {
+    display: none;
+}
+
+/* Remove active state scaling */
+.canvas-container.active {
+    transform: none;
+}
+
+/* Subtle graph overlay - only visible on hover and very light */
+.graph-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    background: 
+        linear-gradient(90deg, transparent 49.8%, rgba(148, 163, 184, 0.03) 50%, transparent 50.2%),
+        linear-gradient(180deg, transparent 49.8%, rgba(148, 163, 184, 0.03) 50%, transparent 50.2%);
+    background-size: 60px 60px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.canvas-container:hover .graph-overlay {
+    opacity: 0.3;
+}
+
+/* Loading state - minimal */
+.canvas-container.loading::before {
+    background: 
+        linear-gradient(90deg, rgba(148, 163, 184, 0.01) 1px, transparent 1px),
+        linear-gradient(rgba(148, 163, 184, 0.01) 1px, transparent 1px);
+    /* Remove shimmer animation */
+}
