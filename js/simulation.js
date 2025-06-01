@@ -1,11 +1,9 @@
-
 function updateSimulation() {
     // Emit new rays
-    if (frameCount % (Math.max(1, 8 - emissionRate)) === 0) {
+    if (frameCount % (Math.max(1, 10 - emissionRate)) === 0) {
         emitNewRays();
     }
-    
-    
+
     // Update existing rays
     rays.forEach(ray => {
         if (!ray.active) return;
@@ -20,9 +18,6 @@ function updateSimulation() {
     
     // Remove inactive rays
     rays = rays.filter(ray => ray.active);
-    
-    // Update distribution plot
-    renderHistogramOverlay(ctx, terminationBounds);
     
     frameCount++;
 }

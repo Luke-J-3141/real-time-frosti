@@ -1,22 +1,26 @@
 
 // Define masking lines for each ellipse
-function getUpperEllipseMaskLine() {
-    const { slopet, interseptt} = getEllipseConstants();
+function getEllipseMaskLine(ellipseType) {
+    const { slopet, slopel, interseptt, interseptl} = getEllipseConstants();
     
-    return {
-        slope: slopet,
-        intercept: interseptt, // y-intercept
-    };
+    if (ellipseType === 'upper') {
+        return {
+            slope: slopet,
+            intercept: interseptt, // y-intercept
+        };
+    }
+    else if (ellipseType === 'lower') {
+        return {
+            slope: slopel,
+            intercept: interseptl, // y-intercept
+        };
+    }
 }
 
-function getLowerEllipseMaskLine() {
-    const {slopel, interseptl} = getEllipseConstants();
+function isPointAboveEllipse(x, y, ellipseType) {
     
-    return {
-        slope: slopel, 
-        intercept: interseptl, // y-intercept
-    };
 }
+
 
 function isPointAboveMaskLine(x, y, maskLine) {
     // Line equation: y = slope * x + intercept

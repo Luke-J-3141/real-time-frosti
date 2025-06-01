@@ -80,4 +80,3 @@ function clearTerminationCounts() {
     terminationCounts.clear();
 }
 
-

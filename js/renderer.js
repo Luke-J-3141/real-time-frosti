@@ -23,8 +23,8 @@ function drawReflectors() {
     ctx.lineWidth = Math.min(3, Math.max(0.5, 2 / zoomLevel)); // Dynamic width with upper limit of 3
 
     // Get mask lines
-    const upperMask = getUpperEllipseMaskLine();
-    const lowerMask = getLowerEllipseMaskLine();
+    const upperMask = getEllipseMaskLine("upper");
+    const lowerMask = getEllipseMaskLine("lower");
     
     // Get source plane position (you'll need to get this from your source configuration)
 
@@ -85,7 +85,8 @@ function drawReflectors() {
 function drawRays() {
     rays.forEach(ray => {
         if (ray.path.length < 2) return;
-        
+
+
         const opacity = ray.getOpacity();
         
         let totalDistance = 0;
@@ -173,7 +174,10 @@ function redraw() {
     drawReflectors();
     drawRays();
     drawSource();
-    drawDiagonalLines_UC();
+    drawDiagonalLines_UC();    
+    
+    // Update distribution plot
+    renderHistogramOverlay(ctx, terminationBounds);
 
 }
 
