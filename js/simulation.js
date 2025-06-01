@@ -35,5 +35,6 @@ function animate() {
     redraw();
     displayAnalysisResults();
 
+
     animationId = requestAnimationFrame(animate);
 }   

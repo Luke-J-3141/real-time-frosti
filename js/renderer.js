@@ -16,22 +16,8 @@ function worldToScreen(worldX, worldY) {
     };
 }
 
-function isLeftOfSourcePlane(x, y) {
-    const { x1, y1, x2, y2 } = computeSourceLine();
-    
-    // Calculate the cross product to determine which side of the line the point is on
-    // For a line from (x1,y1) to (x2,y2) and point (x,y):
-    // cross product = (x2-x1)*(y-y1) - (y2-y1)*(x-x1)
-    const crossProduct = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
-    
-    // If cross product > 0, point is to the left of the line (when looking from start to end)
-    // If cross product < 0, point is to the right of the line
-    // If cross product = 0, point is on the line
-    return crossProduct > 0;
-}
-
 function drawReflectors() {
-    const { ht, hl, kt, kl, ct, cl, dt, dl, phit, phil, slopet, slopel, interseptt, interseptl } = getEllipseConstants();
+    const { ht, hl, kt, kl, ct, cl, dt, dl, phit, phil} = getEllipseConstants();
 
     ctx.strokeStyle = '#FFD700'; // Gold color
     ctx.lineWidth = Math.min(3, Math.max(0.5, 2 / zoomLevel)); // Dynamic width with upper limit of 3
@@ -129,7 +115,8 @@ function drawRays() {
     
     ctx.globalAlpha = 1;
 }
-//render
+
+
 function drawSource() {
     const { x1, y1, x2, y2 } = computeSourceLine();
 
@@ -145,7 +132,8 @@ function drawSource() {
     ctx.stroke();
 
 }
-//render
+
+
 function drawDiagonalLines_UC() {
     const { slopet, slopel, interseptt, interseptl } = getEllipseConstants();
     
@@ -177,7 +165,7 @@ function drawDiagonalLines_UC() {
     ctx.setLineDash([]);
 }
 
-
+// Full drawing function
 function redraw() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);  
     
@@ -186,39 +174,6 @@ function redraw() {
     drawRays();
     drawSource();
     drawDiagonalLines_UC();
-   
+
 }
 
-// Auto-center the view on the geometry
-function autoCenter() {
-    const { ht, hl, kt, kl, ct, cl, dt, dl } = getEllipseConstants();
-    const sourceCoords = computeSourceLine();
-    
-    // Calculate bounds of all geometry
-    const allX = [ht - ct, ht + ct, hl - cl, hl + cl, sourceCoords.x1, sourceCoords.x2];
-    const allY = [kt - dt, kt + dt, kl - dl, kl + dl, sourceCoords.y1, sourceCoords.y2];
-    
-    const minX = Math.min(...allX);
-    const maxX = Math.max(...allX);
-    const minY = Math.min(...allY);
-    const maxY = Math.max(...allY);
-    
-    // Calculate center of geometry
-    const centerWorldX = (minX + maxX) / 2;
-    const centerWorldY = (minY + maxY) / 2;
-    
-    // Calculate required zoom to fit everything with some padding
-    const geometryWidth = maxX - minX;
-    const geometryHeight = maxY - minY;
-    const padding = 1.2; // 20% padding
-    
-    const zoomX = canvasWidth / (geometryWidth * padding);
-    const zoomY = canvasHeight / (geometryHeight * padding);
-    zoomLevel = Math.min(zoomX, zoomY, 5); // Cap at 5x zoom
-    
-    // Set pan to center the geometry
-    panX = -centerWorldX * zoomLevel;
-    panY = centerWorldY * zoomLevel;
-    
-    updateZoomInfo();
-}

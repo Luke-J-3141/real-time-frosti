@@ -65,20 +65,6 @@ function updateValues() {
     voffset = verticalOffset;
 }
 
-// Zoom and pan controls
-function updateZoomInfo() {
-    const zoomPercent = Math.round(zoomLevel * 100);
-    document.getElementById('zoomInfo').textContent = 
-        `Zoom: ${zoomPercent}% | Pan: Drag to move`;
-}
-
-function setZoom(newZoom) {
-    zoomLevel = Math.max(0.5, Math.min(1.9, newZoom));
-    updateZoomInfo();
-    redraw();
-    
-}
-
 // Event listeners
 document.getElementById('startBtn').addEventListener('click', () => {
     
