@@ -187,24 +187,150 @@ function performFullRayAnalysis() {
     };
 }
 
-// Function to display analysis results in console (for debugging/testing)
-function displayAnalysisResults() {
-    const analysis = performFullRayAnalysis();
+// Gaussian curve overlay system for main canvas
+let gaussianVisible = true;
+
+const GAUSSIAN_CONFIG = {
+    lineWidth: 2,              // Thickness of the Gaussian curve
+    opacity: 0.8,              // Curve transparency
+    curveColor: '#ef4444',     // Red color for the curve
+    fillColor: 'rgba(239, 68, 68, 0.1)', // Semi-transparent fill under curve
+    pointDensity: 200,         // Number of points to draw the curve
+    showFill: true,            // Whether to fill under the curve
+    xOffset: 0                 // Horizontal offset from origin
+};
+
+// Draw Gaussian curve on the main canvas
+function drawGaussianOnCanvas(ctx) {
+    // Get the fitted Gaussian parameters
+    const gaussianParams = fitGaussianToTerminationData();
     
-    console.log("=== Ray Termination Analysis ===");
-    console.log("Gaussian Equation:", analysis.summary.equation);
-    console.log("Average Reflector Hits per Ray:", analysis.summary.averageReflectorHits);
-    console.log("Total Terminations:", analysis.summary.totalTerminations);
-    console.log("Gaussian Peak Position:", analysis.summary.gaussianPeak);
-    console.log("Gaussian FWHM (2σ):", analysis.summary.gaussianWidth);
-    console.log("R² (Fit Quality):", analysis.summary.rSquared);
+    // Check if we have valid Gaussian data
+    if (!gaussianVisible || !gaussianParams) return;
     
-    if (analysis.gaussian) {
-        console.log("Gaussian Parameters:");
-        console.log("  Amplitude (A):", analysis.gaussian.amplitude.toFixed(3));
-        console.log("  Mean (μ):", analysis.gaussian.mean.toFixed(3));
-        console.log("  Standard Deviation (σ):", analysis.gaussian.standardDeviation.toFixed(3));
+    // Get canvas dimensions
+    const canvasHeight = ctx.canvas.height;
+    const canvasWidth = ctx.canvas.width;
+    
+    // Save context state
+    ctx.save();
+    
+    // Apply the same transformation as your histogram
+    ctx.setTransform(
+        zoomLevel, 0, 0, zoomLevel,
+        panX + canvasWidth/2, panY + canvasHeight/2
+    );
+    
+    // Get termination stats to determine y-range
+    const stats = getTerminationStats();
+    if (!stats || stats.distribution.size === 0) {
+        ctx.restore();
+        return;
     }
     
-    return analysis;
+    // Determine y-range from actual data
+    const bins = Array.from(stats.distribution.keys());
+    const minY = Math.min(...bins);
+    const maxY = Math.max(...bins);
+    const yRange = maxY - minY;
+    const padding = yRange * 0.2; // Add 20% padding
+    
+    // Generate Gaussian curve points
+    const yMin = minY - padding;
+    const yMax = maxY + padding;
+    const gaussianPoints = generateGaussianCurve(gaussianParams, yMin, yMax, GAUSSIAN_CONFIG.pointDensity);
+    
+    if (gaussianPoints.length === 0) {
+        ctx.restore();
+        return;
+    }
+    
+    // Scale the Gaussian values to match histogram scale
+    const maxGaussianValue = Math.max(...gaussianPoints.map(p => p.value));
+    const scaleFactor = (GAUSSIAN_CONFIG.maxBarLength || HISTOGRAM_CONFIG.maxBarLength) / zoomLevel;
+    
+    // Set line style
+    ctx.strokeStyle = GAUSSIAN_CONFIG.curveColor;
+    ctx.lineWidth = GAUSSIAN_CONFIG.lineWidth / zoomLevel;
+    ctx.globalAlpha = GAUSSIAN_CONFIG.opacity;
+    
+    // Draw filled area under curve if enabled
+    if (GAUSSIAN_CONFIG.showFill) {
+        ctx.fillStyle = GAUSSIAN_CONFIG.fillColor;
+        ctx.beginPath();
+        
+        // Start from baseline
+        const firstPoint = gaussianPoints[0];
+        const firstX = -((firstPoint.value / maxGaussianValue) * scaleFactor) + GAUSSIAN_CONFIG.xOffset / zoomLevel;
+        ctx.moveTo(GAUSSIAN_CONFIG.xOffset / zoomLevel, firstPoint.y);
+        
+        // Draw curve
+        gaussianPoints.forEach(point => {
+            const x = -((point.value / maxGaussianValue) * scaleFactor) + GAUSSIAN_CONFIG.xOffset / zoomLevel;
+            ctx.lineTo(x, point.y);
+        });
+        
+        // Close path to baseline
+        const lastPoint = gaussianPoints[gaussianPoints.length - 1];
+        ctx.lineTo(GAUSSIAN_CONFIG.xOffset / zoomLevel, lastPoint.y);
+        ctx.closePath();
+        ctx.fill();
+    }
+    
+    // Draw the curve outline
+    ctx.beginPath();
+    gaussianPoints.forEach((point, index) => {
+        const x = -((point.value / maxGaussianValue) * scaleFactor) + GAUSSIAN_CONFIG.xOffset / zoomLevel;
+        
+        if (index === 0) {
+            ctx.moveTo(x, point.y);
+        } else {
+            ctx.lineTo(x, point.y);
+        }
+    });
+    ctx.stroke();
+    
+    // Restore context state
+    ctx.restore();
+}
+
+// Toggle Gaussian visibility
+function toggleGaussian() {
+    gaussianVisible = !gaussianVisible;
+}
+
+// Adjust Gaussian configuration
+function setGaussianConfig(config) {
+    Object.assign(GAUSSIAN_CONFIG, config);
+}
+
+// Enhanced keyboard controls (add to your existing event listener or replace it)
+document.addEventListener('keydown', (e) => {
+
+    if (e.key === 'g' || e.key === 'G') {
+        toggleGaussian();
+        console.log('Gaussian curve toggled:', gaussianVisible);
+    } else if (e.key === 'f' || e.key === 'F') {
+        // Toggle fill under Gaussian curve
+        GAUSSIAN_CONFIG.showFill = !GAUSSIAN_CONFIG.showFill;
+        console.log('Gaussian fill toggled:', GAUSSIAN_CONFIG.showFill);
+    }
+});
+
+// Utility function to get current Gaussian fit info for debugging
+function getGaussianInfo() {
+    const gaussianParams = fitGaussianToTerminationData();
+    if (gaussianParams) {
+        console.log('Current Gaussian Parameters:');
+        console.log('  Peak:', gaussianParams.mean.toFixed(3));
+        console.log('  Width (σ):', gaussianParams.standardDeviation.toFixed(3));
+        console.log('  Amplitude:', gaussianParams.amplitude.toFixed(3));
+        console.log('  Equation:', gaussianParams.equation);
+        
+        const fitQuality = calculateGaussianFitQuality(gaussianParams);
+        console.log('  R² (fit quality):', fitQuality.toFixed(4));
+    } else {
+        console.log('No Gaussian data available');
+    }
+    return gaussianParams;
 }

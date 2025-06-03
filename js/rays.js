@@ -101,19 +101,27 @@ function emitNewRays() {
     const nx = -dy / length;
     const ny = dx / length;
 
-    // Emit rays based on emission rate
     for (let i = 0; i < emissionRate; i++) {
-        // Random position along the source line
         const t = Math.random();
         const x = x1 + t * (x2 - x1);
         const y = y1 + t * (y2 - y1);
 
-        // Add some angular spread for more realistic emission
         const baseAngle = Math.atan2(ny, nx);
-        const spread = 3; // Small angular spread
-        const angle = baseAngle + (Math.random() - 0.5) * spread;
+        const maxSpread = 3;
+        const minSpread = 0.5; // Minimum spread even for edge rays
+        const edgeThreshold = 0.1; // Consider rays within 10% of edges as "edge rays"
+        
+        let actualSpread;
+        if (t < edgeThreshold || t > (1 - edgeThreshold)) {
+            // Edge rays: use minimum spread
+            actualSpread = minSpread;
+        } else {
+            // Interior rays: use full spread
+            actualSpread = maxSpread;
+        }
+        
+        const angle = baseAngle + (Math.random() - 0.5) * actualSpread;
         
         rays.push(new Ray(x, y, angle));
     }
 }
-

@@ -28,8 +28,7 @@ function animate() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     updateSimulation();
     redraw();
-    displayAnalysisResults();
-
+    getGaussianInfo();
 
     animationId = requestAnimationFrame(animate);
 }   
