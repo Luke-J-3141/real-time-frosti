@@ -188,7 +188,7 @@ function performFullRayAnalysis() {
 }
 
 // Gaussian curve overlay system for main canvas
-let gaussianVisible = true;
+let gaussianVisible = false;
 
 const GAUSSIAN_CONFIG = {
     lineWidth: 2,              // Thickness of the Gaussian curve
