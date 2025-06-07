@@ -100,7 +100,7 @@ function drawRays() {
             );
             
             ctx.strokeStyle = ray.getColorAtDistance(totalDistance);
-            ctx.lineWidth = Math.min(3, Math.max(0.5, 1.5 / zoomLevel));    ctx.globalAlpha = opacity;
+            ctx.lineWidth = Math.min(2, Math.max(0.5, 1.5 / zoomLevel));    ctx.globalAlpha = opacity;
             
             const screenPrev = worldToScreen(prevPoint.x, prevPoint.y);
             const screenCurr = worldToScreen(currPoint.x, currPoint.y);
