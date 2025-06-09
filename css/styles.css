@@ -1,8 +1,23 @@
-/* CSS Reset and Base Styles */
+/* Your existing CSS with mobile enhancements */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* Prevent text selection flash */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Allow text selection only where needed */
+input, textarea, .selectable-text {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
 }
 
 body {
@@ -16,20 +31,30 @@ body {
     color: #f8fafc;
     line-height: 1.5;
     overflow-x: hidden;
+    /* Prevent bounce scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Main Container */
+/* Main Container - Mobile First */
 .container {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: clamp(20px, 4vw, 40px);
-    max-width: 1600px;
+    grid-template-columns: 1fr;
+    gap: 20px;
     width: 100%;
-    padding: clamp(16px, 3vw, 32px);
+    padding: 16px;
     align-items: start;
 }
 
-/* Canvas Section - Simplified */
+/* Desktop Layout */
+@media (min-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr auto;
+        gap: 40px;
+        padding: 32px;
+    }
+}
+
+/* Canvas Section */
 .canvas-container {
     position: relative;
     border-radius: 16px;
@@ -39,15 +64,31 @@ body {
         0 25px 50px -12px rgba(0, 0, 0, 0.8),
         0 0 0 1px rgba(148, 163, 184, 0.05);
     backdrop-filter: blur(8px);
+    /* Mobile: Make canvas responsive */
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+/* Desktop: Canvas fills remaining space except control panel */
+@media (min-width: 1024px) {
+    .canvas-container {
+        max-width: none;
+        width: 100%;
+        height: 90vh; /* Fill viewport height minus padding */
+    }
 }
 
-/* Canvas Inner Enhancement - Clean and minimal */
 canvas {
     background: transparent !important;
     position: relative;
     z-index: 2;
     border-radius: 14px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    /* Mobile: Aspect ratio */
+    aspect-ratio: 1;
 }
 
 canvas:active {
@@ -58,9 +99,11 @@ canvas:hover {
     filter: brightness(1.02);
 }
 
-/* Enhanced Controls Panel */
+/* Enhanced Controls Panel - Mobile First */
 .controls {
-    width: 380px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
     background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
     border-radius: 20px;
     border: 1px solid rgba(148, 163, 184, 0.1);
@@ -68,15 +111,26 @@ canvas:hover {
         0 25px 50px -12px rgba(0, 0, 0, 0.6),
         inset 0 1px 0 rgba(148, 163, 184, 0.1);
     backdrop-filter: blur(12px);
-    max-height: 85vh;
-    overflow: hidden;
+    /* Mobile: No height restriction */
+    max-height: none;
+    overflow: visible;
     position: relative;
 }
 
+/* Desktop: Fixed width and height */
+@media (min-width: 1024px) {
+    .controls {
+        width: 380px;
+        max-height: 85vh;
+        overflow: hidden;
+    }
+}
+
 .controls-header {
-    padding: 24px 24px 0;
+    padding: 24px 24px 16px;
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 139, 34, 0.1));
     border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 20px 20px 0 0;
 }
 
 .controls-title {
@@ -97,39 +151,52 @@ canvas:hover {
 
 .controls-content {
     padding: 24px;
-    overflow-y: auto;
-    height: calc(85vh - 120px);
+    /* Mobile: No height restriction, natural scroll */
+    overflow-y: visible;
+    height: auto;
 }
 
-/* Custom Scrollbar */
-.controls-content::-webkit-scrollbar {
-    width: 8px;
+/* Desktop: Scrollable content */
+@media (min-width: 1024px) {
+    .controls-content {
+        overflow-y: auto;
+        height: calc(85vh - 120px);
+    }
 }
 
-.controls-content::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.5);
-    border-radius: 4px;
+/* Custom Scrollbar - Desktop only */
+@media (min-width: 1024px) {
+    .controls-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .controls-content::-webkit-scrollbar-track {
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 4px;
+    }
+
+    .controls-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #3b82f6, #228b22);
+        border-radius: 4px;
+        border: 1px solid rgba(15, 23, 42, 0.3);
+    }
+
+    .controls-content::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #3b82f6, #228b22);
+    }
 }
 
-.controls-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #3b82f6, #228b22);
-    border-radius: 4px;
-    border: 1px solid rgba(15, 23, 42, 0.3);
-}
-
-.controls-content::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #3b82f6, #228b22);
-}
-
-/* Control Sections */
+/* Control Sections - Mobile Collapsible with improved animations */
 .control-section {
-    margin-bottom: 32px;
-    padding: 20px;
+    margin-bottom: 20px;
+    padding: 16px;
     background: rgba(30, 41, 59, 0.4);
     border-radius: 12px;
     border: 1px solid rgba(148, 163, 184, 0.1);
     position: relative;
     overflow: hidden;
+    /* Improved mobile collapsible behavior */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .control-section::before {
@@ -150,6 +217,19 @@ canvas:hover {
     display: flex;
     align-items: center;
     gap: 8px;
+    cursor: pointer;
+    padding: 8px 0;
+    /* Mobile: Larger tap target with better touch response */
+    min-height: 48px;
+    position: relative;
+    z-index: 10;
+    /* Prevent text selection on headers */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Remove tap highlight */
+    -webkit-tap-highlight-color: transparent;
 }
 
 .control-section h3::before {
@@ -158,6 +238,52 @@ canvas:hover {
     height: 6px;
     background: linear-gradient(135deg, #3b82f6, #228b22);
     border-radius: 50%;
+}
+
+/* Mobile: Improved collapsible sections with better animation */
+.control-section h3::after {
+    content: '▼';
+    margin-left: auto;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 12px;
+    transform-origin: center;
+}
+
+.control-section.collapsed h3::after {
+    transform: rotate(-90deg);
+}
+
+/* Improved collapsible content with max-height animation */
+.control-content {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+}
+
+.control-section.collapsed .control-content {
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Desktop: Always expanded */
+@media (min-width: 1024px) {
+    .control-section h3 {
+        cursor: default;
+        min-height: auto;
+    }
+    
+    .control-section h3::after {
+        display: none;
+    }
+    
+    .control-section.collapsed .control-content {
+        max-height: 1000px;
+        opacity: 1;
+    }
 }
 
 /* Control Groups */
@@ -169,45 +295,58 @@ label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-    font-size: 13px;
+    margin-bottom: 12px;
+    font-size: 14px;
     font-weight: 500;
     color: #cbd5e1;
+    /* Mobile: Larger text */
+    min-height: 44px;
+    /* Prevent text selection flash */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .value {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: #3b82f6;
     background: rgba(59, 130, 246, 0.1);
-    padding: 2px 8px;
+    padding: 4px 10px;
     border-radius: 6px;
     border: 1px solid rgba(59, 130, 246, 0.2);
+    min-width: 50px;
+    text-align: center;
 }
 
-/* Enhanced Range Inputs */
+/* Enhanced Range Inputs - Mobile Friendly */
 input[type="range"] {
     width: 100%;
-    height: 8px;
-    border-radius: 4px;
+    height: 12px;
+    border-radius: 6px;
     background: linear-gradient(90deg, #1e293b, #334155);
     outline: none;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
     appearance: none;
     -webkit-appearance: none;
     cursor: pointer;
     position: relative;
     pointer-events: auto;
+    /* Mobile: Larger touch target */
+    padding: 10px 0;
+    /* Remove tap highlight */
+    -webkit-tap-highlight-color: transparent;
 }
 
 input[type="range"]::-webkit-slider-thumb {
     appearance: none;
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: linear-gradient(135deg, #3b82f6, #228b22);
     cursor: pointer;
-    border: 2px solid #ffffff;
+    border: 3px solid #ffffff;
     box-shadow: 
         0 4px 12px rgba(59, 130, 246, 0.4),
         0 0 0 4px rgba(59, 130, 246, 0.1);
@@ -222,42 +361,52 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 input[type="range"]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: linear-gradient(135deg, #3b82f6, #228b22);
     cursor: pointer;
-    border: 2px solid #ffffff;
+    border: 3px solid #ffffff;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     -moz-appearance: none;
 }
 
 input[type="range"]::-moz-range-track {
     background: linear-gradient(90deg, #1e293b, #334155);
-    height: 8px;
-    border-radius: 4px;
+    height: 12px;
+    border-radius: 6px;
     border: none;
 }
 
-/* Enhanced Buttons */
+/* Enhanced Buttons - Mobile Friendly */
 button {
     background: linear-gradient(135deg, #3b82f6, #228b22);
     color: rgb(255, 255, 255);
     border: none;
-    padding: 12px 20px;
-    border-radius: 10px;
+    padding: 16px 24px;
+    border-radius: 12px;
     cursor: pointer;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     margin-right: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 
         0 4px 12px rgba(59, 130, 246, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
     position: relative;
     overflow: hidden;
+    /* Mobile: Larger touch target */
+    min-height: 48px;
+    min-width: 120px;
+    /* Remove tap highlight */
+    -webkit-tap-highlight-color: transparent;
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 button:hover {
@@ -278,49 +427,19 @@ button:active {
     gap: 8px;
 }
 
-/* Legend and Info Sections */
-.legend {
-    background: rgba(30, 41, 59, 0.6);
-    padding: 16px;
-    border-radius: 10px;
-    font-size: 12px;
-    line-height: 1.6;
-    margin-top: 20px;
-    border: 1px solid rgba(148, 163, 184, 0.1);
+/* Mobile: Stack buttons */
+@media (max-width: 600px) {
+    .button-group {
+        flex-direction: column;
+    }
+    
+    button {
+        margin-right: 0;
+        width: 100%;
+    }
 }
 
-.legend-item {
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    transition: transform 0.2s ease;
-}
-
-.legend-item:hover {
-    transform: translateX(4px);
-}
-
-.color-box {
-    width: 18px;
-    height: 18px;
-    margin-right: 12px;
-    border-radius: 4px;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.physics-info {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 139, 34, 0.1));
-    padding: 16px;
-    border-radius: 10px;
-    font-size: 11px;
-    color: #94a3b8;
-    margin-top: 16px;
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    backdrop-filter: blur(4px);
-}
-
-/* Zoom Controls */
+/* Zoom Controls - Mobile Friendly */
 .zoom-controls {
     position: absolute;
     top: 16px;
@@ -330,8 +449,8 @@ button:active {
 }
 
 .zoom-btn {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid rgba(148, 163, 184, 0.2);
@@ -340,12 +459,22 @@ button:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     margin: 0;
     padding: 0;
     transition: all 0.2s ease;
     backdrop-filter: blur(8px);
+    /* Mobile: Larger touch target */
+    min-height: 48px;
+    min-width: 48px;
+    /* Remove tap highlight */
+    -webkit-tap-highlight-color: transparent;
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .zoom-btn:hover {
@@ -359,80 +488,76 @@ button:active {
     bottom: 16px;
     left: 16px;
     background: rgba(30, 41, 59, 0.8);
-    padding: 10px 14px;
+    padding: 12px 16px;
     border-radius: 8px;
-    font-size: 11px;
+    font-size: 12px;
     color: #cbd5e1;
     border: 1px solid rgba(148, 163, 184, 0.2);
     backdrop-filter: blur(8px);
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .container {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .controls {
-        width: 100%;
-        max-width: 500px;
-        justify-self: center;
-    }
-}
-
-@media (max-width: 768px) {
-    .controls {
-        border-radius: 16px;
-        max-height: 60vh;
-    }
-    
-    .canvas-container {
-        border-radius: 12px;
-    }
-    
-    .zoom-controls {
-        top: 12px;
-        right: 12px;
-    }
-    
-    .zoom-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 16px;
-    }
-}
-
-/* Loading Animation */
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-.loading {
-    animation: pulse 2s infinite;
-}
-
-/* Hover Effects */
-.control-section:hover {
+/* Legend and Info Sections */
+.legend {
     background: rgba(30, 41, 59, 0.6);
-    border-color: rgba(59, 130, 246, 0.3);
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 20px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
-/* Focus States */
-input[type="range"]:focus {
-    outline: 2px solid rgba(59, 130, 246, 0.5);
-    outline-offset: 2px;
+.legend-item {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s ease;
+    /* Mobile: Larger touch target */
+    min-height: 36px;
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-button:focus {
-    outline: 2px solid rgba(59, 130, 246, 0.5);
-    outline-offset: 2px;
+.legend-item:hover {
+    transform: translateX(4px);
 }
 
-/* ===== SUBTLE CANVAS ENHANCEMENT MODULES ===== */
+.color-box {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
 
-/* Minimal Canvas Background - Very subtle grid */
+.physics-info {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 139, 34, 0.1));
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 16px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    backdrop-filter: blur(4px);
+    line-height: 1.5;
+    /* Allow text selection for info content */
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* Canvas enhancements */
 .canvas-container::before {
     content: '';
     position: absolute;
@@ -449,7 +574,6 @@ button:focus {
     opacity: 0.5;
 }
 
-/* Subtle Border - No animation, just clean outline */
 .canvas-container::after {
     content: '';
     position: absolute;
@@ -463,31 +587,6 @@ button:focus {
     opacity: 0.3;
 }
 
-/* Remove all particle effects and animations */
-.canvas-container .particles,
-.particle {
-    display: none;
-}
-
-/* Minimal hover effect */
-canvas:hover {
-    filter: brightness(1.02);
-    box-shadow: 
-        0 0 20px rgba(59, 130, 246, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-/* Remove corner accents */
-.canvas-corner-accent {
-    display: none;
-}
-
-/* Remove active state scaling */
-.canvas-container.active {
-    transform: none;
-}
-
-/* Subtle graph overlay - only visible on hover and very light */
 .graph-overlay {
     position: absolute;
     top: 0;
@@ -508,10 +607,97 @@ canvas:hover {
     opacity: 0.3;
 }
 
-/* Loading state - minimal */
-.canvas-container.loading::before {
-    background: 
-        linear-gradient(90deg, rgba(148, 163, 184, 0.01) 1px, transparent 1px),
-        linear-gradient(rgba(148, 163, 184, 0.01) 1px, transparent 1px);
-    /* Remove shimmer animation */
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 12px;
+        gap: 16px;
+    }
+    
+    .controls-header {
+        padding: 20px 20px 12px;
+    }
+    
+    .controls-content {
+        padding: 20px;
+    }
+    
+    .control-section {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .zoom-controls {
+        top: 12px;
+        right: 12px;
+    }
+    
+    .zoom-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+    }
+    
+    .zoom-info {
+        bottom: 12px;
+        left: 12px;
+        font-size: 11px;
+        padding: 10px 14px;
+    }
+    
+    /* Improved mobile touch behavior */
+    .control-section h3 {
+        /* Add visual feedback for touch */
+        transition: background-color 0.2s ease;
+    }
+    
+    .control-section h3:active {
+        background-color: rgba(59, 130, 246, 0.1);
+        border-radius: 8px;
+    }
+}
+
+/* Focus states for accessibility */
+input[type="range"]:focus {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+}
+
+button:focus {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Additional mobile improvements for better collapsible behavior */
+@media (max-width: 1023px) {
+    /* Ensure collapsible sections work properly on mobile */
+    .control-section {
+        contain: layout style;
+    }
+    
+    /* Prevent layout shifts during animation */
+    .control-content {
+        will-change: max-height, opacity;
+    }
+    
+    /* Improve touch response */
+    .control-section h3 {
+        touch-action: manipulation;
+    }
+}
+
+/* Prevent unwanted highlighting/selection globally */
+::selection {
+    background: rgba(59, 130, 246, 0.3);
+    color: white;
+}
+
+::-moz-selection {
+    background: rgba(59, 130, 246, 0.3);
+    color: white;
 }

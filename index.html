@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FROSTI Ray Tracing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    <title>FROSTI Ray Tracing</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
         <div class="canvas-container">
-            <canvas id="canvas" width="800" height="800"></canvas>
+            <canvas id="canvas" width="600" height="600"></canvas>
             <div class="zoom-controls">
                 <button class="zoom-btn" id="zoomIn">+</button>
                 <button class="zoom-btn" id="zoomOut">−</button>
@@ -29,82 +28,80 @@
             <div class="controls-content">
                 <div class="control-section">
                     <h3>Simulation Controls</h3>
-                    <div class="button-group">
-                        <button id="startBtn">Start Simulation</button>
-                        <button id="resetBtn">Reset</button>
-                        <button id="clearRay">Clear Rays</button> 
-                         <button id="clearHist">Clear Histogram</button> 
+                    <div class="control-content">
+                        <div class="button-group">
+                            <button id="startBtn">Start Simulation</button>
+                            <button id="resetBtn">Reset</button>
+                            <button id="clearRay">Clear Rays</button> 
+                            <button id="clearHist">Clear Histogram</button> 
+                        </div>
                     </div>
                 </div>
                 
                 <div class="control-section">
                     <h3>Ray Parameters</h3>
-                    <div class="control-group">
-                        <label>Ray Emission Rate</label>
-                        <input type="range" id="emissionRate" min="1" max="10" step="1" value="2">
-                        <div class="value" id="emissionRateValue">2</div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>Max Bounces</label>
-                        <input type="range" id="maxBounces" min="2" max="20" step="1" value="8">
-                        <div class="value" id="maxBouncesValue">8</div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>Ray Speed</label>
-                        <input type="range" id="raySpeed" min="0.5" max="6.5" step="0.1" value="4">
-                        <div class="value" id="raySpeedValue">4</div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>Ray Lifetime</label>
-                        <input type="range" id="rayLifetime" min="100" max="800" step="50" value="400">
-                        <div class="value" id="rayLifetimeValue">400</div>
+                    <div class="control-content">
+                        <div class="control-group">
+                            <label>Ray Emission Rate <span class="value" id="emissionRateValue">2</span></label>
+                            <input type="range" id="emissionRate" min="1" max="10" step="1" value="2">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Max Bounces <span class="value" id="maxBouncesValue">8</span></label>
+                            <input type="range" id="maxBounces" min="2" max="20" step="1" value="8">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Ray Speed <span class="value" id="raySpeedValue">4</span></label>
+                            <input type="range" id="raySpeed" min="0.5" max="10" step="0.1" value="4">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Ray Lifetime <span class="value" id="rayLifetimeValue">400</span></label>
+                            <input type="range" id="rayLifetime" min="100" max="800" step="50" value="400">
+                        </div>
                     </div>
                 </div>
 
                 <div class="control-section">
                     <h3>Reflector Geometry</h3>
-                    <div class="control-group">
-                        <label>Source Width</label>
-                        <input type="range" id="sourceLength" min="10" max="500" step="10" value="100">
-                        <div class="value" id="sourceLengthValue">100</div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>Source Tilt (radians)</label>
-                        <input type="range" id="theta" min="0" max="1.5" step="0.01" value="0.6">
-                        <div class="value" id="thetaValue">0.60</div>
-                    </div>
-                    
-                    <div class="control-group">
-                        <label>Distance from Origin</label>
-                        <input type="range" id="dist_sor_tar" min="0" max="1000" step="5" value="500">
-                        <div class="value" id="dist_sor_tar_Value">500</div>
-                    </div>
-            
-                    <div class="control-group">
-                        <label>Target Width</label>
-                        <input type="range" id="targetLength" min="50" max="600" step="5" value="400">
-                        <div class="value" id="targetLengthValue">400</div>
-                    </div>
+                    <div class="control-content">
+                        <div class="control-group">
+                            <label>Source Width <span class="value" id="sourceLengthValue">100</span></label>
+                            <input type="range" id="sourceLength" min="10" max="500" step="10" value="100">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Source Tilt (radians) <span class="value" id="thetaValue">0.60</span></label>
+                            <input type="range" id="theta" min="0" max="1.5" step="0.01" value="0.6">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Distance from Origin <span class="value" id="dist_sor_tar_Value">500</span></label>
+                            <input type="range" id="dist_sor_tar" min="0" max="1000" step="5" value="500">
+                        </div>
+                
+                        <div class="control-group">
+                            <label>Target Width <span class="value" id="targetLengthValue">400</span></label>
+                            <input type="range" id="targetLength" min="50" max="600" step="5" value="400">
+                        </div>
 
-                    <div class="control-group">
-                        <label>Vertical Offset</label>
-                        <input type="range" id="verticalOffset" min="0" max="1000" step="5" value="10">
-                        <div class="value" id="verticalOffsetValue">10</div>
+                        <div class="control-group">
+                            <label>Vertical Offset <span class="value" id="verticalOffsetValue">10</span></label>
+                            <input type="range" id="verticalOffset" min="0" max="1000" step="5" value="10">
+                        </div>
                     </div>
                 </div>
                             
                 <div class="physics-info">
                     <strong>Description:</strong><br>
-                    • Start the simulation, while running you are free to change parameters on the fly.<br>
+                    • Start the simulation, while running you are free to change parameters and see their effects.<br>
                     • Visualize how the FROSTI reflectors work, adjust the control parameters 
                     "Target Width", "Source Width", "Source Tilt", and "Distance from Origin"
                     and see how the Elliptical Reflectors change.<br>
                     • Tune the Ray properties to see how that effects the simulation. <br>
-                    • If you want to reset the rays or the histogram with out stoping the simulation, use the "Clear Rays" or "Clear Histogram" buttons.<br>
+                    • If you want to reset the rays or the histogram without stopping the simulation, use the "Clear Rays" or "Clear Histogram" buttons.<br>
+                    • On mobile: Tap section headers to collapse/expand controls to save space.
                 </div>
             </div>
         </div>
@@ -114,10 +111,15 @@
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+
+        // Canvas and viewport parameters - Mobile responsive
+        let canvasWidth = Math.min(1800, window.innerWidth - 32);
+        let canvasHeight = canvasWidth; // Keep square aspect ratio
+        console.log(`Canvas size: ${canvasWidth} x ${canvasHeight}`);
+
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
         
-        // Canvas and viewport parameters
-        const canvasWidth = 800;
-        const canvasHeight = 800;
         let centerX = canvasWidth / 2;
         let centerY = canvasHeight / 2;
         
@@ -131,7 +133,7 @@
         
         // Physics constants
         const EPS = 1e-6;
-        // Simulation state
+        // Simulation stateg
         let rays = [];
         let isRunning = false;
         let animationId = null;
@@ -142,6 +144,8 @@
         let emissionRate, maxBounces, raySpeed, rayLifetime;
         let a, b, z0, voffset;
     </script>
+
+    <script src="js/controls-mobile.js"></script>
     <script src="js/controls.js"></script>
     <script src="js/geometry.js"></script>
     <script src="js/rays.js"></script>

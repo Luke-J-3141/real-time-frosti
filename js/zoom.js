@@ -40,7 +40,7 @@ function updateZoomInfo() {
 }
 
 function setZoom(newZoom) {
-    zoomLevel = Math.max(0.5, Math.min(3, newZoom));
+    zoomLevel = Math.max(0.25, Math.min(5, newZoom));
     updateZoomInfo();
     redraw();
     

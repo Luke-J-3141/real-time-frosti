@@ -20,7 +20,7 @@ function drawReflectors() {
     const { ht, hl, kt, kl, ct, cl, dt, dl, phit, phil} = getEllipseConstants();
 
     ctx.strokeStyle = '#FFD700'; // Gold color
-    ctx.lineWidth = Math.min(3, Math.max(0.5, 2 / zoomLevel)); // Dynamic width with upper limit of 3
+    ctx.lineWidth = Math.min(2, Math.max(1, 2 / zoomLevel)); // Dynamic width with upper limit of 3
 
     // Get mask lines
     const upperMask = getEllipseMaskLine("upper");
@@ -100,7 +100,7 @@ function drawRays() {
             );
             
             ctx.strokeStyle = ray.getColorAtDistance(totalDistance);
-            ctx.lineWidth = Math.min(2, Math.max(0.5, 1.5 / zoomLevel));    ctx.globalAlpha = opacity;
+            ctx.lineWidth = Math.min(1, Math.max(1, 2 / zoomLevel));    ctx.globalAlpha = opacity;
             
             const screenPrev = worldToScreen(prevPoint.x, prevPoint.y);
             const screenCurr = worldToScreen(currPoint.x, currPoint.y);
@@ -122,7 +122,7 @@ function drawSource() {
     const { x1, y1, x2, y2 } = computeSourceLine();
 
     ctx.strokeStyle = '#FFA500';
-        ctx.lineWidth = Math.min(3, Math.max(0.5, 3 / zoomLevel));
+        ctx.lineWidth = Math.min(2, Math.max(1, 3 / zoomLevel));
     
     const screen1 = worldToScreen(x1, y1);
     const screen2 = worldToScreen(x2, y2);
@@ -139,7 +139,7 @@ function drawDiagonalLines_UC() {
     const { slopet, slopel, interseptt, interseptl } = getEllipseConstants();
     
     ctx.strokeStyle = '#8B00FF';
-    ctx.lineWidth = Math.min(3, Math.max(0.5, 1 / zoomLevel));
+    ctx.lineWidth = Math.min(2, Math.max(1, 1 / zoomLevel));
     ctx.setLineDash([5 / zoomLevel, 5 / zoomLevel]);
     
     // Calculate visible bounds based on current zoom and pan
