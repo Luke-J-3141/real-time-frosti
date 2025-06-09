@@ -113,7 +113,7 @@
         const ctx = canvas.getContext('2d');
 
         // Canvas and viewport parameters - Mobile responsive
-        let canvasWidth = Math.min(1800, window.innerWidth - 32);
+        let canvasWidth = Math.max(1800, window.innerWidth - 32);
         let canvasHeight = canvasWidth; // Keep square aspect ratio
         console.log(`Canvas size: ${canvasWidth} x ${canvasHeight}`);
 
