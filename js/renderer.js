@@ -178,7 +178,7 @@ function redraw() {
     
     // Update distribution plot
     renderHistogramOverlay(ctx, terminationBounds);
-    drawGaussianOnCanvas(ctx)
+    drawKDEOnCanvas(ctx);
 
 }
 
