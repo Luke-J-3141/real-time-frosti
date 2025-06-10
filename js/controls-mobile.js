@@ -57,13 +57,15 @@ function toggleSection(e) {
     }
 }
 
-// Improved touch event handling for canvas
+// Improved touch event handling for canvas - Smooth movement
 let touchStartTime = 0;
 let touchMoved = false;
 
 canvas.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+    // Only prevent default for single touch (allow pinch zoom, etc.)
+    if (e.touches.length === 1) {
+        e.preventDefault();
+    }
     
     const touch = e.touches[0];
     const rect = canvas.getBoundingClientRect();
@@ -75,45 +77,44 @@ canvas.addEventListener('touchstart', function(e) {
 }, { passive: false });
 
 canvas.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!isDragging) return;
-    
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = touch.clientX - rect.left;
-    const mouseY = touch.clientY - rect.top;
-    
-    const deltaX = mouseX - lastMouseX;
-    const deltaY = mouseY - lastMouseY;
-    
-    // Only register as moved if there's significant movement
-    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
-        touchMoved = true;
-        panX += deltaX / zoomLevel;
-        panY += deltaY / zoomLevel;
+    if (e.touches.length === 1 && isDragging) {
+        e.preventDefault();
         
-        lastMouseX = mouseX;
-        lastMouseY = mouseY;
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = touch.clientX - rect.left;
+        const mouseY = touch.clientY - rect.top;
         
-        updateZoomInfo();
-        if (!isRunning) {
-            redraw();
+        const deltaX = mouseX - lastMouseX;
+        const deltaY = mouseY - lastMouseY;
+        
+        // Reduced threshold for smoother movement
+        if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
+            touchMoved = true;
+            panX += deltaX / zoomLevel;
+            panY += deltaY / zoomLevel;
+            
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+            
+            updateZoomInfo();
+            if (!isRunning) {
+                redraw();
+            }
         }
     }
 }, { passive: false });
 
 canvas.addEventListener('touchend', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    isDragging = false;
-    
-    // Handle tap vs drag
-    const touchDuration = Date.now() - touchStartTime;
-    if (!touchMoved && touchDuration < 300) {
-        // This was a tap, not a drag - could handle tap events here if needed
+    if (e.touches.length === 0) {
+        e.preventDefault();
+        isDragging = false;
+        
+        // Handle tap vs drag
+        const touchDuration = Date.now() - touchStartTime;
+        if (!touchMoved && touchDuration < 300) {
+            // This was a tap, not a drag - could handle tap events here if needed
+        }
     }
 }, { passive: false });
 
