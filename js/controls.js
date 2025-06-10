@@ -86,6 +86,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     document.getElementById('startBtn').textContent = 'Start Simulation';
     rays = [];
     resetHistogram();
+    resetKDE();
     redraw();
 });
 
@@ -96,6 +97,7 @@ document.getElementById('clearRay').addEventListener('click', () => {
 
 document.getElementById('clearHist').addEventListener('click', () => {
     resetHistogram();
+    resetKDE();
     redraw();
 });
 

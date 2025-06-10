@@ -361,6 +361,13 @@ function toggleKDE() {
         currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
     }
 }
+ 
+function resetKDE() {
+    kdeVisible = false;
+    currentKDEParams = null;
+    KDE_CONFIG.bandwidth = null; // Reset to auto-calculate
+    console.log('KDE reset to default state');
+}
 
 // Update KDE configuration
 function setKDEConfig(config) {
