@@ -8,7 +8,7 @@
 
 
 // Histogram overlay system for main canvas
-let histogramVisible = true;
+let histogramVisible = false;
 
 // These variables should match your existing distribution plot system
 
@@ -24,21 +24,16 @@ const HISTOGRAM_CONFIG = {
     textColor: '#ffffff'      // Text color
 };
 
-// Reset function to clear histogram data 
-function resetHistogram() {
-    clearTerminationCounts();
-}
-
 // Helper function to interpolate between two colors based on count intensity
 function getBarColor(count, maxCount) {
     // Calculate intensity (0 to 1)
     const intensity = count / maxCount;
     
-    // Base color (blue): #3b82f6 -> rgb(59, 130, 246)
-    // High count color (green): #10b981 -> rgb(16, 185, 129)
+    // Red color: #ff0000 -> rgb(255, 0, 0)
+    // Orange color: #ff8000 -> rgb(255, 128, 0)
     
-    const baseR = 59, baseG = 130, baseB = 246;
-    const highR = 16, highG = 185, highB = 129;
+    const baseR = 255, baseG = 0, baseB = 0;
+    const highR = 255, highG = 128, highB = 0;
     
     // Interpolate RGB values
     const r = Math.round(baseR + (highR - baseR) * intensity);
@@ -115,6 +110,12 @@ function renderHistogramOverlay(ctx, terminationBounds) {
 // Toggle histogram visibility
 function toggleHistogram() {
     histogramVisible = !histogramVisible;
+    console.log(`Histogram visibility:`, histogramVisible);
+}
+
+// Reset function to clear histogram data 
+function resetHistogram() {
+    clearTerminationCounts();
 }
 
 // Adjust histogram configuration
@@ -128,7 +129,8 @@ document.addEventListener('keydown', (e) => {
         toggleHistogram();
     } else if (e.key === 'r' || e.key === 'R') {
         resetHistogram();
-        console.log('Histogram data reset');
+        resetKDE();
+        console.log('Histogram and KDE data reset');
     }
 });
 

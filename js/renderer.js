@@ -140,7 +140,7 @@ function drawDiagonalLines_UC() {
     
     ctx.strokeStyle = '#8B00FF';
     ctx.lineWidth = Math.min(2, Math.max(1, 1 / zoomLevel));
-    ctx.setLineDash([5 / zoomLevel, 5 / zoomLevel]);
+    ctx.setLineDash([5 , 5 ]);
     
     // Calculate visible bounds based on current zoom and pan
     const bounds = 1000 / zoomLevel;
@@ -169,9 +169,9 @@ function drawDiagonalLines_UC() {
 // Full drawing function
 function redraw() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);  
+    ctx.save();
     drawGrid(ctx);
-    
-    renderHistogramOverlay(ctx, terminationBounds);
+
     drawReflectors();
     drawRays();
     drawSource();
@@ -179,7 +179,10 @@ function redraw() {
     
     // Update distribution plot
     renderHistogramOverlay(ctx, terminationBounds);
+    renderHistogramRectangle(ctx, zoomLevel, panX, panY);
+    
     drawKDEOnCanvas(ctx);
+    ctx.restore();
 
 }
 

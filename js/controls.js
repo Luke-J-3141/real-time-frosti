@@ -1,7 +1,7 @@
 // <====== Comments ======>
 // TODO:
 
-const R_tm = 2700; // Termination radius
+const R_tm = 170 * PIXELS_PER_MM; // Termination radius
 
 // Control elements
 const controls = {
@@ -72,10 +72,12 @@ document.getElementById('startBtn').addEventListener('click', () => {
         isRunning = false;
         if (animationId) cancelAnimationFrame(animationId);
         document.getElementById('startBtn').textContent = 'Start Simulation';
+        console.log('Simulation paused');
     } else {
         updateValues();
         isRunning = true;
         document.getElementById('startBtn').textContent = 'Pause Simulation';
+        console.log('Simulation started');
         animate();
     }
 });
@@ -85,17 +87,20 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     if (animationId) cancelAnimationFrame(animationId);
     document.getElementById('startBtn').textContent = 'Start Simulation';
     rays = [];
+    console.log('Simulation reset and stopped');
     resetHistogram();
     resetKDE();
     redraw();
 });
 
 document.getElementById('clearRay').addEventListener('click', () => {
+    console.log('Rays cleared');
     rays = [];
     redraw();
 });
 
 document.getElementById('clearHist').addEventListener('click', () => {
+    console.log('Histogram and KDE cleared');
     resetHistogram();
     resetKDE();
     redraw();
@@ -111,9 +116,7 @@ document.getElementById('zoomOut').addEventListener('click', () => {
 });
 
 document.getElementById('zoomReset').addEventListener('click', () => {
-    zoomLevel = 1;
-    panX = 0;
-    panY = 0;
+    autoCenter();
     updateZoomInfo();
     redraw();
 });

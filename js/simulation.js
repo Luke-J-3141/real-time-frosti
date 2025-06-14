@@ -24,10 +24,15 @@ function updateSimulation() {
 //simulation
 function animate() {
     if (!isRunning) return;
-    
+    perfMonitor.frameStart();
+
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     updateSimulation();
+
+    perfMonitor.renderStart();
     redraw();
 
+    perfMonitor.renderEnd();
+    perfMonitor.frameEnd();
     animationId = requestAnimationFrame(animate);
 }   

@@ -35,22 +35,22 @@ function autoCenter() {
 // Convert screen coordinates to world coordinates
 function screenToWorld(screenX, screenY) {
     const worldX = (screenX - panX) / zoomLevel;
-    const worldY = -(screenY - panY) / zoomLevel; // Flip Y coordinate
+    const worldY = (screenY - panY) / zoomLevel; 
     return { x: worldX, y: worldY };
 }
 
-// Zoom on cursor position with unlimited zoom
+// Zoom on cursor position with unlimited zoom - FIXED VERSION
 function zoomAtCursor(cursorX, cursorY, zoomFactor) {
     // Get world coordinates of cursor position before zoom
     const worldPos = screenToWorld(cursorX, cursorY);
     
     // Apply zoom
-    const oldZoom = zoomLevel;
     zoomLevel = Math.max(0.01, zoomLevel * zoomFactor); // Minimum zoom of 1% to prevent issues
     
-    // Calculate new pan to keep cursor position fixed
+    // Calculate new pan to keep cursor position fixed in world coordinates
+    // The cursor should map to the same world position after zoom
     panX = cursorX - worldPos.x * zoomLevel;
-    panY = cursorY + worldPos.y * zoomLevel; // Flip Y coordinate back
+    panY = cursorY - worldPos.y * zoomLevel; 
     
     updateZoomInfo();
     redraw();
@@ -69,13 +69,13 @@ function setZoom(newZoom) {
     redraw();
 }
 
-// Mouse wheel zoom handler (add this to your event listeners)
+// Mouse wheel zoom handler
 function handleMouseWheel(event) {
     event.preventDefault();
     
     // Get cursor position relative to canvas
     const rect = canvas.getBoundingClientRect();
-    const cursorX = event.clientX - rect.left;
+    const cursorX = event.clientX - rect.right;
     const cursorY = event.clientY - rect.top;
     
     // Determine zoom factor
@@ -84,4 +84,5 @@ function handleMouseWheel(event) {
     zoomAtCursor(cursorX, cursorY, zoomFactor);
 }
 
+// Make sure to add the event listener
 canvas.addEventListener('wheel', handleMouseWheel, { passive: false });

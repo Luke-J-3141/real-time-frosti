@@ -1,24 +1,24 @@
 // Unit conversion constants
-const PIXELS_PER_CM = 100;
-const CM_PER_PIXEL = 1 / PIXELS_PER_CM;
+const PIXELS_PER_MM = 100;
+const MM_PER_PIXEL = 1 / PIXELS_PER_MM;
 
 // Unit conversion functions
-function mmToPx(cm) {
-    return cm * PIXELS_PER_CM;
+function mmToPx(mm) {
+    return mm * PIXELS_PER_MM;
 }
 
 function pxTomm(px) {
-    return px * CM_PER_PIXEL;
+    return px * MM_PER_PIXEL;
 }
 
 // Grid configuration - hierarchical subdivision optimized for 25% to 500% zoom range
 // TO DO: Needs some tweeking for optimal performance
 const GRID_LEVELS = [
-    { spacing: PIXELS_PER_CM * 15,  minZoom: 0.2, maxZoom: 0.5,  opacity: 0.7, lineWidth: 0.6 }, // 5cm  
-    { spacing: PIXELS_PER_CM * 5,  minZoom: 0.4,  maxZoom: 1.0,  opacity: 0.6, lineWidth: 0.5 }, // 2cm
-    { spacing: PIXELS_PER_CM,      minZoom: 0.8,  maxZoom: 2.0,  opacity: 0.5, lineWidth: 0.4 }, // 1cm
-    { spacing: PIXELS_PER_CM / 5,  minZoom: 1.5,  maxZoom: 5.0,  opacity: 0.4, lineWidth: 0.3 }, // 5mm
-    { spacing: PIXELS_PER_CM / 25, minZoom: 3.0,  maxZoom: 5.0,  opacity: 0.3, lineWidth: 0.2 }  // 1mm
+    { spacing: PIXELS_PER_MM * 15,  minZoom: 0.01, maxZoom: 0.2,  opacity: 0.4, lineWidth: 0.2 }, // 5cm  
+    { spacing: PIXELS_PER_MM * 5,  minZoom: 0.1,  maxZoom: 0.5,  opacity: 0.4, lineWidth: 0.2 }, // 2cm
+    { spacing: PIXELS_PER_MM,      minZoom: 0.4,  maxZoom: 0.8,  opacity: 0.5, lineWidth: 0.2 }, // 1cm
+    { spacing: PIXELS_PER_MM / 5,  minZoom: 0.6,  maxZoom: 5.0,  opacity: 0.4, lineWidth: 0.3 }, // 5mm
+    { spacing: PIXELS_PER_MM / 25, minZoom: 3.0,  maxZoom: 90.0,  opacity: 0.3, lineWidth: 0.2 }  // 1mm
 ];
 
 // Add grid drawing function for reference

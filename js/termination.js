@@ -1,11 +1,11 @@
 
 // Termination line parameters
-let terminationBounds = R_tm; // ±b in y-direction
+let terminationBounds = R_tm; // bounds of TM in y-direction
 const terminationX = 0; // x-coordinate of the termination line
 
 // Counter for collision positions
 let terminationCounts = new Map(); // Maps y-position to count
-const binSize = 2; // Size of y-bins for counting collisions
+const binSize = 1; // Size of y-bins for counting collisions
 
 
 // Function to get binned y-position for counting

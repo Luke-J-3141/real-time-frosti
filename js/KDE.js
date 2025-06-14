@@ -160,102 +160,6 @@ function findKDEModes(kdeParams, yMin = -100, yMax = 100, resolution = 1000) {
     return modes;
 }
 
-// Function to calculate statistics comparing KDE to original histogram
-function calculateKDEFitQuality(kdeParams) {
-    if (!kdeParams) return { rSquared: 0, meanAbsoluteError: 0, maxError: 0 };
-    
-    const stats = getTerminationStats();
-    const positions = [];
-    const observedCounts = [];
-    
-    for (const [binY, count] of stats.distribution) {
-        positions.push(binY);
-        observedCounts.push(count);
-    }
-    
-    if (positions.length === 0) return { rSquared: 0, meanAbsoluteError: 0, maxError: 0 };
-    
-    // Calculate KDE predictions at bin positions
-    const predictedDensities = positions.map(y => evaluateKDE(y, kdeParams));
-    
-    // Scale KDE densities to match histogram counts
-    const maxDensity = Math.max(...predictedDensities);
-    const maxCount = Math.max(...observedCounts);
-    const scaleFactor = maxCount / maxDensity;
-    
-    const predictedCounts = predictedDensities.map(density => density * scaleFactor);
-    
-    // Calculate R²
-    const meanObserved = observedCounts.reduce((sum, count) => sum + count, 0) / observedCounts.length;
-    let totalSumSquares = 0;
-    let residualSumSquares = 0;
-    let absoluteErrorSum = 0;
-    let maxError = 0;
-    
-    for (let i = 0; i < positions.length; i++) {
-        const observed = observedCounts[i];
-        const predicted = predictedCounts[i];
-        const error = Math.abs(observed - predicted);
-        
-        totalSumSquares += Math.pow(observed - meanObserved, 2);
-        residualSumSquares += Math.pow(observed - predicted, 2);
-        absoluteErrorSum += error;
-        maxError = Math.max(maxError, error);
-    }
-    
-    const rSquared = totalSumSquares > 0 ? Math.max(0, 1 - (residualSumSquares / totalSumSquares)) : 0;
-    const meanAbsoluteError = absoluteErrorSum / positions.length;
-    
-    return {
-        rSquared: rSquared,
-        meanAbsoluteError: meanAbsoluteError,
-        maxError: maxError,
-        scaleFactor: scaleFactor
-    };
-}
-
-// Comprehensive KDE analysis function
-function performKDEAnalysis(kernelType = 'gaussian', bandwidth = null) {
-    const kdeFit = fitKDEToTerminationData(kernelType, bandwidth);
-    
-    if (!kdeFit) {
-        return {
-            kde: null,
-            modes: [],
-            fitQuality: { rSquared: 0, meanAbsoluteError: 0, maxError: 0 },
-            comparison: null
-        };
-    }
-    
-    
-    const fitQuality = calculateKDEFitQuality(kdeFit);
-    const modes = findKDEModes(kdeFit);
-    
-    // Compare with Gaussian fit
-    const gaussianFit = fitGaussianToTerminationData();
-    const gaussianR2 = gaussianFit ? calculateGaussianFitQuality(gaussianFit) : 0;
-    
-    return {
-        kde: kdeFit,
-        modes: modes,
-        fitQuality: fitQuality,
-        comparison: {
-            kdeR2: fitQuality.rSquared,
-            gaussianR2: gaussianR2,
-            betterFit: fitQuality.rSquared > gaussianR2 ? 'KDE' : 'Gaussian',
-            improvement: Math.abs(fitQuality.rSquared - gaussianR2)
-        },
-        summary: {
-            kernelType: kernelType,
-            bandwidth: kdeFit.bandwidth.toFixed(3),
-            numberOfModes: modes.length,
-            primaryMode: modes.length > 0 ? modes[0].position.toFixed(2) : 'N/A',
-            rSquared: fitQuality.rSquared.toFixed(4),
-            meanAbsoluteError: fitQuality.meanAbsoluteError.toFixed(2)
-        }
-    };
-}
-
 // KDE curve overlay system for main canvas
 let kdeVisible = false;
 let currentKDEParams = null;
@@ -263,8 +167,8 @@ let currentKDEParams = null;
 const KDE_CONFIG = {
     lineWidth: 2,
     opacity: 0.8,
-    curveColor: '#3b82f6',     // Blue color to distinguish from Gaussian
-    fillColor: 'rgba(59, 130, 246, 0.1)',
+    curveColor: '#dc2626',     // Red color
+    fillColor: 'rgba(220, 38, 38, 0.1)',
     pointDensity: 300,         // Higher density for smoother curves
     showFill: true,
     xOffset: 0,
@@ -349,8 +253,8 @@ function drawKDEOnCanvas(ctx) {
         }
     });
     ctx.stroke();
-    
     ctx.restore();
+    setKDEConfig();
 }
 
 // Toggle KDE visibility and update parameters
@@ -366,7 +270,6 @@ function resetKDE() {
     kdeVisible = false;
     currentKDEParams = null;
     KDE_CONFIG.bandwidth = null; // Reset to auto-calculate
-    console.log('KDE reset to default state');
 }
 
 // Update KDE configuration
@@ -402,31 +305,4 @@ document.addEventListener('keydown', (e) => {
         console.log('KDE bandwidth decreased to:', KDE_CONFIG.bandwidth.toFixed(3));
     }
 });
-
-// Utility function to get current KDE info for debugging
-function getKDEInfo() {
-    const analysis = performKDEAnalysis(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
-    
-    if (analysis.kde) {
-        console.log('Current KDE Parameters:');
-        console.log('  Kernel:', analysis.kde.kernelType);
-        console.log('  Bandwidth:', analysis.kde.bandwidth.toFixed(3));
-        console.log('  Mean:', analysis.kde.mean.toFixed(3));
-        console.log('  Std Dev:', analysis.kde.standardDeviation.toFixed(3));
-        console.log('  R² (fit quality):', analysis.fitQuality.rSquared.toFixed(4));
-        console.log('  Number of modes:', analysis.modes.length);
-        
-        if (analysis.modes.length > 0) {
-            console.log('  Primary mode at:', analysis.modes[0].position.toFixed(3));
-        }
-        
-        if (analysis.comparison) {
-            console.log('  Better fit than Gaussian?', analysis.comparison.betterFit === 'KDE');
-        }
-    } else {
-        console.log('No KDE data available');
-    }
-    
-    return analysis;
-}
 

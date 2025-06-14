@@ -43,22 +43,22 @@
                     <div class="control-content">
                         <div class="control-group">
                             <label>Ray Emission Rate <span class="value" id="emissionRateValue">1</span></label>
-                            <input type="range" id="emissionRate" min="1" max="3" step="1" value="1">
+                            <input type="range" id="emissionRate" min="1" max="5" step="1" value="1">
                         </div>
                         
                         <div class="control-group">
                             <label>Max Bounces <span class="value" id="maxBouncesValue">8</span></label>
-                            <input type="range" id="maxBounces" min="2" max="20" step="1" value="8">
+                            <input type="range" id="maxBounces" min="0" max="5" step="1" value="5">
                         </div>
                         
                         <div class="control-group">
-                            <label>Ray Speed <span class="value" id="raySpeedValue">4</span></label>
-                            <input type="range" id="raySpeed" min="0.5" max="10" step="0.1" value="4">
+                            <label>Ray Speed <span class="value" id="raySpeedValue">30</span></label>
+                            <input type="range" id="raySpeed" min="5" max="50" step="0.1" value="30">
                         </div>
                         
                         <div class="control-group">
-                            <label>Ray Lifetime <span class="value" id="rayLifetimeValue">400</span></label>
-                            <input type="range" id="rayLifetime" min="100" max="800" step="50" value="400">
+                            <label>Ray Lifetime <span class="value" id="rayLifetimeValue">600</span></label>
+                            <input type="range" id="rayLifetime" min="100" max="800" step="50" value="600">
                         </div>
                     </div>
                 </div>
@@ -69,43 +69,33 @@
                         <div class="control-group">
                             <label>Source Width <span class="value" id="sourceLengthValue">2.0 mm</span></label>
                             <input type="range" id="sourceLength" min="10" max="500" step="10" value="200">
-                            <!-- 0.1cm to 5.0cm in 0.1cm steps -->
                         </div>
                         
                         <div class="control-group">
-                            <label>Source Tilt (radians) <span class="value" id="thetaValue">0.69</span></label>
-                            <input type="range" id="theta" min="0" max="1.5" step="0.01" value="0.69">
+                            <label>Source Tilt (radians) <span class="value" id="thetaValue">0.9</span></label>
+                            <input type="range" id="theta" min="0" max="1.4" step="0.01" value="0.9">
                         </div>
                         
                         <div class="control-group">
                             <label>Distance from Origin <span class="value" id="dist_sor_tar_Value">50.0 mm</span></label>
-                            <input type="range" id="dist_sor_tar" min="100" max="10000" step="10" value="5000">
-                            <!-- 1.0cm to 10.0cm in 0.1cm steps -->
+                            <input type="range" id="dist_sor_tar" min="1000" max="10000" step="10" value="7500">
                         </div>
                 
                         <div class="control-group">
-                            <label>Target Width <span class="value" id="targetLengthValue">20.0 mm</span></label>
-                            <input type="range" id="targetLength" min="50" max="6000" step="10" value="2000">
-                            <!-- 0.5cm to 6.0cm in 0.1cm steps -->
+                            <label>Target Width <span class="value" id="targetLengthValue">40.0 mm</span></label>
+                            <input type="range" id="targetLength" min="50" max="8000" step="10" value="4000">
                         </div>
 
                         <div class="control-group">
-                            <label>Vertical Offset <span class="value" id="verticalOffsetValue">0.1 cm</span></label>
-                            <input type="range" id="verticalOffset" min="0" max="500" step="5" value="10">
-                            <!-- 0cm to 5.0cm in 0.05cm steps -->
+                            <label>Vertical Offset <span class="value" id="verticalOffsetValue">100 mm</span></label>
+                            <input type="range" id="verticalOffset" min="0" max="20000" step="5" value="10000">
                         </div>
                     </div>
                 </div>
-                            
+                
                 <div class="physics-info">
-                    <strong>Description:</strong><br>
-                    • Start the simulation, while running you are free to change parameters and see their effects.<br>
-                    • Visualize how the FROSTI reflectors work, adjust the control parameters 
-                    "Target Width", "Source Width", "Source Tilt", and "Distance from Origin"
-                    and see how the Elliptical Reflectors change.<br>
-                    • Tune the Ray properties to see how that effects the simulation. <br>
-                    • If you want to reset the rays or the histogram without stopping the simulation, use the "Clear Rays" or "Clear Histogram" buttons.<br>
-                    • On mobile: Tap section headers to collapse/expand controls to save space.
+                    <strong>Help:</strong><br>
+                    Click 'z' key to see hotkey assignments for the simulation.<br>
                 </div>
             </div>
         </div>
@@ -150,8 +140,8 @@
     </script>
 
     <script src="js/controls-mobile.js"></script>
-    <script src="js/controls.js"></script>
     <script src="js/unitsGrid.js"></script>
+    <script src="js/controls.js"></script>
     <script src="js/geometry.js"></script>
     <script src="js/rays.js"></script>
     <script src="js/renderer.js"></script>
@@ -160,9 +150,93 @@
     <script src="js/KDE.js"></script>
     <script src="js/zoom.js"></script>
     <script src="js/termination.js"></script>
+    <script src="js/testmass_vis.js"></script>
     <script src="js/constraints.js"></script>
+    <script src="js/preformance.js"></script>
 
     <script>
+        // Hotkey help display
+        let helpVisible = false;
+        let helpElement = null;
+
+        function createHelpDisplay() {
+            if (helpElement) return helpElement;
+            
+            helpElement = document.createElement('div');
+            helpElement.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 15px;
+                border-radius: 8px;
+                font-family: monospace;
+                font-size: 14px;
+                line-height: 1.4;
+                z-index: 1000;
+                white-space: pre-line;
+                border: 2px solid #4a90e2;
+            `;
+            
+            helpElement.textContent = `
+            HOTKEY ASSIGNMENTS:
+
+            Histagram Overlay:
+            r - Reset histogram and KDE
+            h - Toggle histogram 
+
+            KDE Overlay:
+            k - Toggle KDE 
+            n - Increase KDE binwidth
+            m - Decrease KDE binwidth
+            b - change KDE fitting method
+
+            "Heating" Overlay:
+            t - Toggle overlay visibility
+            - - Decrease local radius (-2mm)
+            + - Increase local radius (+2mm)
+            [ - Decrease tint strength (-0.1)
+            ] - Increase tint strength (+0.1)
+            `;
+            
+            document.body.appendChild(helpElement);
+            return helpElement;
+        }
+
+        function toggleHelp() {
+            if (helpVisible) {
+                hideHelp();
+            } else {
+                showHelp();
+            }
+        }
+
+        function showHelp() {
+            if (!helpVisible) {
+                createHelpDisplay();
+                helpElement.style.display = 'block';
+                helpVisible = true;
+            }
+        }
+
+        function hideHelp() {
+            if (helpVisible && helpElement) {
+                helpElement.style.display = 'none';
+                helpVisible = false;
+            }
+        }
+
+        // Simple keyboard controls
+        document.addEventListener('keydown', (e) => {
+            // Show help when H is held
+            if (e.key === 'z' || e.key === 'Z') {
+                toggleHelp();
+                return;
+            }
+        }
+        )
+
         // Update display values on control change
         Object.values(controls).forEach(control => {
             control.addEventListener('input', () => {
