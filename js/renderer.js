@@ -169,6 +169,7 @@ function drawDiagonalLines_UC() {
 // Full drawing function
 function redraw() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);  
+    drawGrid(ctx);
     
     renderHistogramOverlay(ctx, terminationBounds);
     drawReflectors();

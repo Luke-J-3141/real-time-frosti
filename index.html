@@ -42,8 +42,8 @@
                     <h3>Ray Parameters</h3>
                     <div class="control-content">
                         <div class="control-group">
-                            <label>Ray Emission Rate <span class="value" id="emissionRateValue">2</span></label>
-                            <input type="range" id="emissionRate" min="1" max="10" step="1" value="2">
+                            <label>Ray Emission Rate <span class="value" id="emissionRateValue">1</span></label>
+                            <input type="range" id="emissionRate" min="1" max="3" step="1" value="1">
                         </div>
                         
                         <div class="control-group">
@@ -67,28 +67,32 @@
                     <h3>Reflector Geometry</h3>
                     <div class="control-content">
                         <div class="control-group">
-                            <label>Source Width <span class="value" id="sourceLengthValue">100</span></label>
-                            <input type="range" id="sourceLength" min="10" max="500" step="10" value="100">
+                            <label>Source Width <span class="value" id="sourceLengthValue">2.0 mm</span></label>
+                            <input type="range" id="sourceLength" min="10" max="500" step="10" value="200">
+                            <!-- 0.1cm to 5.0cm in 0.1cm steps -->
                         </div>
                         
                         <div class="control-group">
-                            <label>Source Tilt (radians) <span class="value" id="thetaValue">0.60</span></label>
-                            <input type="range" id="theta" min="0" max="1.5" step="0.01" value="0.6">
+                            <label>Source Tilt (radians) <span class="value" id="thetaValue">0.69</span></label>
+                            <input type="range" id="theta" min="0" max="1.5" step="0.01" value="0.69">
                         </div>
                         
                         <div class="control-group">
-                            <label>Distance from Origin <span class="value" id="dist_sor_tar_Value">500</span></label>
-                            <input type="range" id="dist_sor_tar" min="0" max="1000" step="5" value="500">
+                            <label>Distance from Origin <span class="value" id="dist_sor_tar_Value">50.0 mm</span></label>
+                            <input type="range" id="dist_sor_tar" min="100" max="10000" step="10" value="5000">
+                            <!-- 1.0cm to 10.0cm in 0.1cm steps -->
                         </div>
                 
                         <div class="control-group">
-                            <label>Target Width <span class="value" id="targetLengthValue">400</span></label>
-                            <input type="range" id="targetLength" min="50" max="600" step="5" value="400">
+                            <label>Target Width <span class="value" id="targetLengthValue">20.0 mm</span></label>
+                            <input type="range" id="targetLength" min="50" max="6000" step="10" value="2000">
+                            <!-- 0.5cm to 6.0cm in 0.1cm steps -->
                         </div>
 
                         <div class="control-group">
-                            <label>Vertical Offset <span class="value" id="verticalOffsetValue">10</span></label>
-                            <input type="range" id="verticalOffset" min="0" max="1000" step="5" value="10">
+                            <label>Vertical Offset <span class="value" id="verticalOffsetValue">0.1 cm</span></label>
+                            <input type="range" id="verticalOffset" min="0" max="500" step="5" value="10">
+                            <!-- 0cm to 5.0cm in 0.05cm steps -->
                         </div>
                     </div>
                 </div>
@@ -113,8 +117,8 @@
         const ctx = canvas.getContext('2d');
 
         // Canvas and viewport parameters - Mobile responsive
-        let canvasWidth = Math.max(1800, window.innerWidth - 32);
-        let canvasHeight = canvasWidth; // Keep square aspect ratio
+        let canvasWidth = Math.max(1500, window.innerWidth - 32);
+        let canvasHeight = Math.max(canvasWidth, window.innerHeight - 32); // Keep square aspect ratio
         console.log(`Canvas size: ${canvasWidth} x ${canvasHeight}`);
 
         canvas.width = canvasWidth;
@@ -147,6 +151,7 @@
 
     <script src="js/controls-mobile.js"></script>
     <script src="js/controls.js"></script>
+    <script src="js/unitsGrid.js"></script>
     <script src="js/geometry.js"></script>
     <script src="js/rays.js"></script>
     <script src="js/renderer.js"></script>

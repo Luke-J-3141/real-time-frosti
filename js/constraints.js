@@ -42,4 +42,20 @@ function isLeftOfSourcePlane(x, y) {
     // If cross product = 0, point is on the line
     return crossProduct > 0;
 }
+
+
 // TODO add proximity constraints 
+
+// Only Draw reflectors and calculate reflection if ellipse is above constraint
+// On toggle so can see with or without
+function isaboveProximity() {
+    const y_proximity = 600; // Distance from TM for proximity
+
+    
+}
+
+function isaboveAperture() {
+    const x_proximity = 1630; // Distance for aperture
+
+
+}

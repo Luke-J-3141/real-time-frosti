@@ -28,9 +28,9 @@ const values = {
     rayLifetimeValue: document.getElementById('rayLifetimeValue'),
 };
 
-
-
+// Update your control value display functions
 function updateValues() {
+    // Get raw pixel values from controls
     sourceLength = parseInt(controls.sourceLength.value);
     targetLength = parseInt(controls.targetLength.value);
     theta = parseFloat(controls.theta.value);
@@ -42,15 +42,15 @@ function updateValues() {
     raySpeed = parseFloat(controls.raySpeed.value);
     rayLifetime = parseInt(controls.rayLifetime.value);
     
-    // Update display values
-    values.sourceLengthValue.textContent = sourceLength;
-    values.targetLengthValue.textContent = targetLength;
-    values.verticalOffsetValue.textContent = verticalOffset;
+    // Update display values with cm units
+    values.sourceLengthValue.textContent = `${pxTomm(sourceLength).toFixed(1)} mm`;
+    values.targetLengthValue.textContent = `${pxTomm(targetLength).toFixed(1)} mm`;
+    values.verticalOffsetValue.textContent = `${pxTomm(verticalOffset).toFixed(1)} mm`;
     values.thetaValue.textContent = theta;
-    values.dist_sor_tar_Value.textContent = dist_sor_tar;
+    values.dist_sor_tar_Value.textContent = `${pxTomm(dist_sor_tar).toFixed(1)} mm`;
     values.emissionRateValue.textContent = emissionRate;
     values.maxBouncesValue.textContent = maxBounces;
-    values.raySpeedValue.textContent = raySpeed;
+    values.raySpeedValue.textContent = `${pxTomm(raySpeed).toFixed(2)} mm/frame`;
     values.rayLifetimeValue.textContent = rayLifetime;
     
     // Update existing rays' max age
@@ -58,7 +58,7 @@ function updateValues() {
         ray.maxAge = rayLifetime;
     });
     
-    // Calculated values
+    // Calculated values (keep in pixels for internal calculations)
     b = sourceLength / 2;
     a = targetLength / 2;
     z0 = dist_sor_tar;
@@ -150,12 +150,7 @@ canvas.addEventListener('mouseleave', () => {
     isDragging = false;
 });
 
-// Mouse wheel for zooming
-canvas.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(zoomLevel * zoomFactor);
-});
+
 
 // Touch controls for mobile
 let lastTouchDistance = 0;
@@ -213,3 +208,4 @@ canvas.addEventListener('touchend', (e) => {
     isDragging = false;
     lastTouchDistance = 0;
 });
+

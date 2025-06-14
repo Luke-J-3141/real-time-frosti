@@ -444,6 +444,7 @@ button:active {
     position: absolute;
     top: 16px;
     right: 16px;
+    z-index: 3;
     display: flex;
     gap: 8px;
 }

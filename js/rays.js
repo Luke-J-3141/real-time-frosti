@@ -47,12 +47,6 @@ class Ray {
         if (checkTerminationCollision(this)) {
             return; // Ray was terminated, no need to check other bounds
         }
-
-        // Check bounds (expanded for zoomed view)
-        const bounds = 10000/zoomLevel; // Adjust bounds based on zoom level;
-        if (Math.abs(this.x) > bounds || Math.abs(this.y) > bounds) {
-            this.active = false;
-        }
     }
 
     reflect(normal) {
@@ -98,8 +92,12 @@ function emitNewRays() {
     const dx = x2 - x1;
     const dy = y2 - y1;
     const length = Math.hypot(dx, dy);
-    const nx = -dy / length;
+    const nx = -dy / length;  // Normal vector
     const ny = dx / length;
+    
+    // Center point of the source line
+    const centerX = (x1 + x2) / 2;
+    const centerY = (y1 + y2) / 2;
 
     for (let i = 0; i < emissionRate; i++) {
         const t = Math.random();
@@ -108,19 +106,27 @@ function emitNewRays() {
 
         const baseAngle = Math.atan2(ny, nx);
         const maxSpread = 3;
-        const minSpread = 0.5; // Minimum spread even for edge rays
         const edgeThreshold = 0.1; // Consider rays within 10% of edges as "edge rays"
         
-        let actualSpread;
+        let angle;
         if (t < edgeThreshold || t > (1 - edgeThreshold)) {
-            // Edge rays: use minimum spread
-            actualSpread = minSpread;
+            // Edge rays: angle ranges from straight (normal) to pointing toward center
+            const directionToCenter = Math.atan2(centerY - y, centerX - x);
+            
+            // Randomly interpolate between normal direction and center direction
+            const mixFactor = Math.random(); // 0 = straight, 1 = toward center
+            
+            // Use spherical linear interpolation for smooth angle blending
+            let angleDiff = directionToCenter - baseAngle;
+            // Normalize angle difference to [-π, π]
+            while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+            while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+            
+            angle = baseAngle + mixFactor * angleDiff;
         } else {
-            // Interior rays: use full spread
-            actualSpread = maxSpread;
+            // Interior rays: use full spread as before
+            angle = baseAngle + (Math.random() - 0.5) * maxSpread;
         }
-        
-        const angle = baseAngle + (Math.random() - 0.5) * actualSpread;
         
         rays.push(new Ray(x, y, angle));
     }

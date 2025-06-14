@@ -23,13 +23,37 @@ function autoCenter() {
     
     const zoomX = canvasWidth / (geometryWidth * padding);
     const zoomY = canvasHeight / (geometryHeight * padding);
-    zoomLevel = Math.min(zoomX, zoomY, 5); // Cap at 5x zoom
+    zoomLevel = Math.min(zoomX, zoomY, 5); // Cap at 5x zoom for auto-center
     
     // Set pan to center the geometry
     panX = -centerWorldX * zoomLevel;
     panY = centerWorldY * zoomLevel;
     
     updateZoomInfo();
+}
+
+// Convert screen coordinates to world coordinates
+function screenToWorld(screenX, screenY) {
+    const worldX = (screenX - panX) / zoomLevel;
+    const worldY = -(screenY - panY) / zoomLevel; // Flip Y coordinate
+    return { x: worldX, y: worldY };
+}
+
+// Zoom on cursor position with unlimited zoom
+function zoomAtCursor(cursorX, cursorY, zoomFactor) {
+    // Get world coordinates of cursor position before zoom
+    const worldPos = screenToWorld(cursorX, cursorY);
+    
+    // Apply zoom
+    const oldZoom = zoomLevel;
+    zoomLevel = Math.max(0.01, zoomLevel * zoomFactor); // Minimum zoom of 1% to prevent issues
+    
+    // Calculate new pan to keep cursor position fixed
+    panX = cursorX - worldPos.x * zoomLevel;
+    panY = cursorY + worldPos.y * zoomLevel; // Flip Y coordinate back
+    
+    updateZoomInfo();
+    redraw();
 }
 
 // Zoom and pan controls
@@ -40,8 +64,24 @@ function updateZoomInfo() {
 }
 
 function setZoom(newZoom) {
-    zoomLevel = Math.max(0.25, Math.min(5, newZoom));
+    zoomLevel = Math.max(0.01, newZoom); // Remove upper limit, keep minimum at 1%
     updateZoomInfo();
     redraw();
-    
 }
+
+// Mouse wheel zoom handler (add this to your event listeners)
+function handleMouseWheel(event) {
+    event.preventDefault();
+    
+    // Get cursor position relative to canvas
+    const rect = canvas.getBoundingClientRect();
+    const cursorX = event.clientX - rect.left;
+    const cursorY = event.clientY - rect.top;
+    
+    // Determine zoom factor
+    const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1; // Zoom out/in by 10%
+    
+    zoomAtCursor(cursorX, cursorY, zoomFactor);
+}
+
+canvas.addEventListener('wheel', handleMouseWheel, { passive: false });
