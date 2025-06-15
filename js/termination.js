@@ -1,10 +1,58 @@
+/**
+ * TERMINATION LINE COLLISION SYSTEM
+ * 
+ * This module handles ray termination at a vertical line (x = 0) with collision detection,
+ * statistics tracking, and performance monitoring. Rays that cross the termination line
+ * within specified bounds are terminated and their collision positions are binned and counted.
+ * 
+ * CONFIGURATION:
+ * - terminationBounds: Y-axis bounds for valid terminations (±R_tm)
+ * - terminationX: X-coordinate of termination line (0)
+ * - binSize: Size of Y-position bins for collision counting (50)
+ * 
+ * CORE FUNCTIONS:
+ * 
+ * checkTerminationCollision(ray)
+ *   - Checks if ray's last segment crosses termination line within bounds
+ *   - Terminates ray and updates position to intersection point if collision detected
+ *   - Records collision in binned counter and tracks performance metrics
+ *   - Returns: boolean (true if ray was terminated)
+ * 
+ * getBinnedY(y)
+ *   - Converts Y-coordinate to binned position for collision counting
+ *   - Returns: number (binned Y-position)
+ * 
+ * getTerminationStats()
+ *   - Calculates termination statistics from collision data
+ *   - Returns: object with {totalTerminations, distribution Map, maxCount, mostHitBin}
+ * 
+ * getTerminationDiagnostics()
+ *   - Comprehensive system health analysis with performance and memory metrics
+ *   - Generates warnings and recommendations for optimization
+ *   - Returns: object with performance metrics, memory usage, health score, status, warnings
+ * 
+ * clearTerminationCounts()
+ *   - Resets all collision counters and performance tracking data
+ *   - Returns: void
+ * 
+ * DATA STRUCTURES:
+ * - terminationCounts: Map(y-bin → collision count) for position distribution
+ * - Performance tracking: call count, total time, average time per collision check
+ * 
+ * INTEGRATION NOTES:
+ * - Call checkTerminationCollision(ray) in your ray update loop
+ * - Use getTerminationDiagnostics() to monitor system health
+ * - Clear counts periodically with clearTerminationCounts() to prevent memory buildup
+ * - Adjust binSize based on required resolution vs memory usage trade-offs
+ */
+
 // Termination line parameters
 let terminationBounds = R_tm; // bounds of TM in y-direction
 const terminationX = 0; // x-coordinate of the termination line
 
 // Counter for collision positions
 let terminationCounts = new Map(); // Maps y-position to count
-const binSize = 2; // Size of y-bins for counting collisions
+const binSize = 50; // Size of y-bins for counting collisions
 
 // Performance tracking
 let terminationCallCount = 0;

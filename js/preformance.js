@@ -1,3 +1,128 @@
+/*
+================================================================================
+PERFORMANCE MONITOR SYSTEM - REAL-TIME PROFILING AND DIAGNOSTICS
+================================================================================
+
+This code implements a comprehensive real-time performance monitoring system
+for the ray tracing application, providing FPS tracking, memory monitoring,
+render timing, and visual overlay diagnostics.
+
+PERFORMANCEMONITOR CLASS:
+Constructor: PerformanceMonitor()
+- Creates overlay UI element and binds hotkey controls
+- Initializes statistics tracking arrays and timing objects
+- Sets up 60-frame rolling history for averaging
+
+CORE MONITORING METHODS:
+- frameStart() → void
+  Call at beginning of each animation frame
+  Records frame start timestamp for timing calculations
+  
+- frameEnd() → void  
+  Call at end of each animation frame
+  Calculates frame time, FPS, updates rolling history
+  Maintains 60-frame history buffer for averaging
+  
+- renderStart() → void
+  Call before rendering operations begin
+  Records render start timestamp
+  
+- renderEnd() → void
+  Call after rendering operations complete  
+  Calculates render time, updates render history
+  Tracks rendering performance separately from total frame time
+  
+- updateRayCount(currentRays, totalRaysCreated?) → void
+  Updates ray statistics for display
+  Tracks both active ray count and cumulative total
+
+CONTROL METHODS:
+- toggle() → void
+  Toggles performance monitor on/off (hotkey: 'P')
+  
+- start() → void
+  Activates monitoring, shows overlay, begins update cycle
+  
+- stop() → void  
+  Deactivates monitoring, hides overlay, stops update cycle
+  
+- reset() → void
+  Clears all historical data and statistics
+
+DATA ACCESS METHODS:
+- getStats() → object
+  Returns comprehensive performance statistics:
+  * current: {fps, frameTime, renderTime, rayCount, totalRays}
+  * average: {fps, frameTime, renderTime} (60-frame rolling average)  
+  * memory: {used, total, limit} (in MB, if available)
+  
+- logStats() → void
+  Outputs formatted performance data to browser console
+  
+- getMemoryUsage() → object | null
+  Returns JavaScript heap memory usage (Chrome/Edge only)
+  Format: {used: MB, total: MB, limit: MB}
+
+VISUAL OVERLAY FEATURES:
+- Real-time FPS and frame timing display
+- Render time and percentage of total frame time
+- Rolling averages for stable performance assessment  
+- Active and total ray count statistics
+- Memory usage monitoring (when available)
+- Color-coded performance status:
+  * GREEN (●): 55+ FPS - Optimal performance
+  * ORANGE (●): 30-54 FPS - Good performance  
+  * RED (●): 15-29 FPS - Slow performance
+  * CRITICAL (●): <15 FPS - Performance issues
+
+INTEGRATION PATTERN:
+```javascript
+// In your animation loop:
+function animate() {
+    perfMonitor.frameStart();           // Start frame timing
+    
+    perfMonitor.renderStart();          // Start render timing
+    redraw();                          // Your rendering code
+    perfMonitor.renderEnd();           // End render timing
+    
+    perfMonitor.updateRayCount(rays.length, rays.totalRaysCreated);
+    perfMonitor.frameEnd();            // End frame timing
+    
+    requestAnimationFrame(animate);
+}
+```
+
+HOTKEY CONTROLS:
+- 'P' key: Toggle performance overlay on/off
+
+STATISTICS TRACKED:
+- Current and average FPS (frames per second)
+- Frame time (total time per animation frame)
+- Render time (time spent in drawing operations)  
+- Render percentage (render time / total frame time)
+- Active ray count (current simulation rays)
+- Total ray count (cumulative rays created)
+- Memory usage (JavaScript heap size)
+- 60-frame rolling history for stable averages
+
+GLOBAL INSTANCE:
+- perfMonitor: Global instance automatically created
+- Available as window.perfMonitor for console access
+
+BROWSER COMPATIBILITY:
+- Core timing: All modern browsers
+- Memory monitoring: Chrome/Edge only (uses performance.memory)
+- Overlay positioning: CSS fixed positioning (IE9+)
+
+PERFORMANCE IMPACT:
+- Minimal overhead when disabled
+- ~0.1ms overhead when enabled
+- Uses requestAnimationFrame-compatible timing
+- Non-blocking statistics calculation
+================================================================================
+*/
+
+
 // performance.js - Performance monitoring for FROSTI Ray Tracing
 class PerformanceMonitor {
     constructor() {
@@ -271,6 +396,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Console API for manual control
+/*
 console.log(`
 🚀 Performance Monitor Loaded!
 
@@ -289,3 +415,4 @@ Add these calls to your animation loop:
 - perfMonitor.renderEnd() after rendering
 - perfMonitor.updateRayCount(rays.length, totalRaysCreated)
 `);
+*/
