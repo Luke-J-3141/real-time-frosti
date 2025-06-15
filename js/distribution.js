@@ -6,12 +6,14 @@
 //
 //
 
-
 // Histogram overlay system for main canvas
 let histogramVisible = false;
 
-// These variables should match your existing distribution plot system
+// Performance tracking for histogram rendering
+let histogramRenderCount = 0;
+let totalHistogramRenderTime = 0;
 
+// These variables should match your existing distribution plot system
 const HISTOGRAM_CONFIG = {
     maxBarLength: 150,        // Maximum bar length in pixels
     barWidth: 4,              // Height of each bar
@@ -45,11 +47,17 @@ function getBarColor(count, maxCount) {
 
 // Draw histogram bars on the main canvas  
 function drawHistogramOnCanvas(ctx) {
+    const startTime = performance.now();
+    histogramRenderCount++;
+    
     // Get stats from your physics module
     const stats = getTerminationStats();
     
     // Check if we have data
-    if (!histogramVisible || !stats || stats.distribution.size === 0) return;
+    if (!histogramVisible || !stats || stats.distribution.size === 0) {
+        totalHistogramRenderTime += (performance.now() - startTime);
+        return;
+    }
     
     // Get canvas dimensions
     const canvasHeight = ctx.canvas.height;
@@ -60,7 +68,10 @@ function drawHistogramOnCanvas(ctx) {
     const counts = bins.map(bin => stats.distribution.get(bin));
     const maxCount = stats.maxCount;
     
-    if (maxCount === 0) return;
+    if (maxCount === 0) {
+        totalHistogramRenderTime += (performance.now() - startTime);
+        return;
+    }
     
     // Save context state
     ctx.save();
@@ -100,6 +111,8 @@ function drawHistogramOnCanvas(ctx) {
     });
     // Restore context state
     ctx.restore();
+    
+    totalHistogramRenderTime += (performance.now() - startTime);
 }
 
 // Call this in your main render loop after drawing rays but before presenting
@@ -110,12 +123,70 @@ function renderHistogramOverlay(ctx, terminationBounds) {
 // Toggle histogram visibility
 function toggleHistogram() {
     histogramVisible = !histogramVisible;
-    console.log(`Histogram visibility:`, histogramVisible);
+    console.log('Histogram toggled:', histogramVisible ? 'ON' : 'OFF');
 }
 
 // Reset function to clear histogram data 
 function resetHistogram() {
     clearTerminationCounts();
+    // Reset histogram performance counters too
+    histogramRenderCount = 0;
+    totalHistogramRenderTime = 0;
+}
+
+// Comprehensive histogram diagnostics function
+function getHistogramDiagnostics() {
+    const stats = getTerminationStats();
+    const avgRenderTime = histogramRenderCount > 0 ? (totalHistogramRenderTime / histogramRenderCount) : 0;
+    const dataPoints = stats ? stats.distribution.size : 0;
+    
+    // Generate warnings and recommendations
+    const warnings = [];
+    const recommendations = [];
+    
+    if (avgRenderTime > 2.0) warnings.push('Slow histogram rendering: ' + avgRenderTime.toFixed(3) + 'ms per frame');
+    if (dataPoints > 500) warnings.push('High histogram complexity: ' + dataPoints + ' bars to render');
+    if (histogramVisible && dataPoints === 0) warnings.push('Histogram visible but no data to display');
+    
+    if (avgRenderTime > 2.0) recommendations.push('Consider reducing histogram detail or optimizing rendering');
+    if (dataPoints > 500) recommendations.push('Increase bin size to reduce number of bars');
+    if (histogramRenderCount > 1000 && avgRenderTime > 1.0) recommendations.push('Consider limiting histogram update frequency');
+    
+    // Calculate health score
+    let healthScore = 100;
+    if (avgRenderTime > 2.0) healthScore -= 40;
+    if (dataPoints > 500) healthScore -= 20;
+    if (avgRenderTime > 5.0) healthScore -= 30;
+    healthScore = Math.max(0, healthScore);
+    
+    return {
+        // Rendering performance
+        totalRenders: histogramRenderCount,
+        totalRenderTimeMs: totalHistogramRenderTime.toFixed(2),
+        avgRenderTimeMs: avgRenderTime.toFixed(4),
+        
+        // Data metrics
+        barsToRender: dataPoints,
+        histogramVisible: histogramVisible,
+        totalDataPoints: stats ? stats.totalTerminations : 0,
+        
+        // Canvas metrics
+        estimatedPixelsPerFrame: dataPoints * HISTOGRAM_CONFIG.barWidth * HISTOGRAM_CONFIG.maxBarLength,
+        configComplexity: Object.keys(HISTOGRAM_CONFIG).length,
+        
+        // Health indicators
+        healthScore: healthScore,
+        warnings: warnings,
+        recommendations: recommendations,
+        
+        // Quick diagnosis
+        status: healthScore > 80 ? 'HEALTHY' : 
+                healthScore > 50 ? 'DEGRADED' : 'CRITICAL',
+        
+        // Performance impact
+        renderingImpact: avgRenderTime > 1.0 ? 'HIGH' : 
+                        avgRenderTime > 0.5 ? 'MEDIUM' : 'LOW'
+    };
 }
 
 // Adjust histogram configuration
@@ -133,5 +204,3 @@ document.addEventListener('keydown', (e) => {
         console.log('Histogram and KDE data reset');
     }
 });
-
-

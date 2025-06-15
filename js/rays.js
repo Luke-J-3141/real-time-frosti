@@ -66,15 +66,16 @@ class Ray {
         const ageRatio = this.age / this.maxAge;
         return Math.max(0.1, 1 - ageRatio * 0.8);
     }
+
     getColorAtDistance(distance) {
         // Create gradient from red to orange based on distance
-        const maxDistance = 800;
+        const maxDistance = rayLifetime * 10 ; // Maximum distance for full color transition
         const ratio = Math.min(distance / maxDistance, 1);
         
         // Starting color: red (255, 0, 0)
-        // Ending color: orange (255, 165, 0)
+        // Ending color: yellow (255, 255, 0)
         const startR = 255, startG = 0, startB = 0;
-        const endR = 255, endG = 165, endB = 0;
+        const endR = 255, endG = 255, endB = 0;
             
         // Interpolate between the two colors
         const r = Math.floor(startR + (endR - startR) * ratio);
@@ -84,7 +85,6 @@ class Ray {
         return `rgb(${r}, ${g}, ${b})`;
     }
 }
-
 
 function emitNewRays() {
     const { x1, y1, x2, y2 } = computeSourceLine();

@@ -99,12 +99,26 @@ document.getElementById('clearRay').addEventListener('click', () => {
     redraw();
 });
 
-document.getElementById('clearHist').addEventListener('click', () => {
-    console.log('Histogram and KDE cleared');
+document.getElementById('resetOverlays').addEventListener('click', () => {
+    console.log('All overlays reset');
     resetHistogram();
     resetKDE();
     redraw();
 });
+
+document.getElementById('toggleKDE').addEventListener('click', () => {
+    toggleKDE();
+});
+
+document.getElementById('toggleHistogram').addEventListener('click', () => {
+    toggleHistogram();
+});
+
+document.getElementById('toggleThermalOverlay').addEventListener('click', () => {
+    const overlay = window.histogramRectangleOverlay;
+    overlay.toggle();
+});
+
 
 // Zoom controls
 document.getElementById('zoomIn').addEventListener('click', () => {

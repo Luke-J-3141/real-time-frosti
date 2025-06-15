@@ -260,6 +260,7 @@ function drawKDEOnCanvas(ctx) {
 // Toggle KDE visibility and update parameters
 function toggleKDE() {
     kdeVisible = !kdeVisible;
+    console.log('KDE toggled:', kdeVisible ? 'ON' : 'OFF');
     if (kdeVisible) {
         // Refresh KDE parameters when toggling on
         currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
@@ -282,7 +283,6 @@ function setKDEConfig(config) {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'k' || e.key === 'K') {
         toggleKDE();
-        console.log('KDE curve toggled:', kdeVisible);
     } else if (e.key === 'b' || e.key === 'B') {
         // Cycle through different kernels
         const kernels = Object.keys(KERNEL_FUNCTIONS);

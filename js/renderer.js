@@ -76,10 +76,10 @@ function drawReflectors() {
     }
 
     // Draw upper ellipse above its mask line and left of source plane
-    drawMaskedEllipse(ht, kt, ct, dt, phit, upperMask, false); // false = draw above mask
+    drawMaskedEllipse(ht, kt, ct, dt, phit, upperMask, true); // false = draw above mask
     
     // Draw lower ellipse below its mask line and left of source plane
-    drawMaskedEllipse(hl, kl, cl, dl, phil, lowerMask, true);  // true = draw below mask
+    drawMaskedEllipse(hl, kl, cl, dl, phil, lowerMask, false);  // true = draw below mask
 }
 
 function drawRays() {
@@ -179,7 +179,7 @@ function redraw() {
     
     // Update distribution plot
     renderHistogramOverlay(ctx, terminationBounds);
-    renderHistogramRectangle(ctx, zoomLevel, panX, panY);
+    renderTM(ctx, zoomLevel, panX, panY);
     
     drawKDEOnCanvas(ctx);
     ctx.restore();

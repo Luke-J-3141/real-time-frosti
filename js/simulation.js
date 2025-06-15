@@ -9,8 +9,8 @@ function updateSimulation() {
         if (!ray.active) return;
         
         ray.step(raySpeed);
-        
         const normal = checkEllipseIntersection(ray);
+        
         if (normal) {
             ray.reflect(normal);
         }
@@ -21,6 +21,8 @@ function updateSimulation() {
     
     frameCount++;
 }
+
+
 //simulation
 function animate() {
     if (!isRunning) return;
@@ -34,5 +36,11 @@ function animate() {
 
     perfMonitor.renderEnd();
     perfMonitor.frameEnd();
+
+    // Termination diagnostics
+    // console.log(getTerminationDiagnostics())
+
+    // Histogram diagnostics
+    //console.log(getHistogramDiagnostics());
     animationId = requestAnimationFrame(animate);
 }   

@@ -1,8 +1,7 @@
 // <====== Comments ======>
 // TODO:
 
-
-// Enhanced ellipse intersection with masking
+// Improved ellipse intersection with better edge case handling
 function checkEllipseIntersection(ray) {
     const { ht, hl, kt, kl, ct, cl, dt, dl, phit, phil } = getEllipseConstants();
     
@@ -10,66 +9,70 @@ function checkEllipseIntersection(ray) {
     const upperMaskLine = getEllipseMaskLine("upper");
     const lowerMaskLine = getEllipseMaskLine("lower");
     
-    // Check intersection with upper ellipse (with masking)
-    let result = checkSingleEllipseIntersection(ray, ht, kt, ct, dt, phit, upperMaskLine, "Upper");
-    if (result) return result;
+    // Check both ellipses and return the closest valid intersection
+    const intersections = [];
     
-    // Check intersection with lower ellipse (with masking)
-    result = checkSingleEllipseIntersection(ray, hl, kl, cl, dl, phil, lowerMaskLine, "Lower");
-    if (result) return result;
+    // Check upper ellipse
+    const upperResult = checkSingleEllipseIntersection(ray, ht, kt, ct, dt, phit, upperMaskLine, "Upper");
     
-    return null;
+    if (upperResult) {
+        intersections.push({...upperResult});
+    }
+    
+    // Check lower ellipse
+    
+    const lowerResult = checkSingleEllipseIntersection(ray, hl, kl, cl, dl, phil, lowerMaskLine, "Lower");
+    
+    if (lowerResult) {
+        intersections.push({...lowerResult});
+    }
+    
+    // Return closest intersection if any
+    if (intersections.length === 0) return null;
+    
+    
+    // Sort by distance and return closest
+    intersections.sort((a, b) => a.distance - b.distance);
+
+    return intersections[0].normal;
 }
 
 function checkSingleEllipseIntersection(ray, h, k, a, b, phi, maskLine, ellipse) {
+    // Validate ellipse parameters
+    if (a <= 0 || b <= 0) return null;
     
-    // Calculate ray's next position
-    const nextX = ray.x + ray.dx * raySpeed;
-    const nextY = ray.y + ray.dy * raySpeed;
+    // Calculate intersection using quadratic formula with better numerical stability
+    const intersection = findEllipseIntersection(ray, h, k, a, b, phi);
+    if (!intersection) return null;
     
-    // Use parametric ray equation: P(t) = ray.pos + t * ray.dir * raySpeed
-    // where t ∈ [0, 1] represents the ray segment from current to next position
+    const { x: intX, y: intY, t, distance } = intersection;
     
-    // First, check if we need to look for intersections at all
-    const currentDist = getDistanceToEllipse(ray.x, ray.y, h, k, a, b, phi);
-    const nextDist = getDistanceToEllipse(nextX, nextY, h, k, a, b, phi);
+    // Validate intersection is within ray segment (with small tolerance)
+    const tolerance = 1e-6;
+    if (t < -tolerance || t > 1 + tolerance) return null;
     
-    // More robust intersection detection
-    const crossesBoundary = Math.sign(currentDist) !== Math.sign(nextDist);
-    
-    if (!crossesBoundary) {
-        return null; // No intersection possible
+    // Apply masking logic with better boundary handling
+    if (!isPointWithinMask(intX, intY, maskLine, ellipse)) {
+        return null;
     }
     
-    // Use analytical solution when possible for better accuracy
-    const analyticalIntersection = findAnalyticalIntersection(ray, h, k, a, b, phi, raySpeed);
-    if (analyticalIntersection) {
-        const { x: intX, y: intY, t } = analyticalIntersection;
-        
-        // Validate the intersection point
-        if (t >= 0 && t <= 1) {
-            // Apply masking logic - FIXED: proper masking conditions
-            if (ellipse === "Upper" && isPointAboveMaskLine(intX, intY, maskLine)) {
-                return null; // Point is above mask line for upper ellipse, ignore (mask upper part)
-
-            } else if (ellipse === "Lower" && !isPointAboveMaskLine(intX, intY, maskLine)) {
-                return null; // Point is below mask line for lower ellipse, ignore (mask lower part)
-            }
-
-            // Update ray position
-            ray.x = intX;
-            ray.y = intY;
-            
-            return calculateEllipseNormal(intX, intY, h, k, a, b, phi);
-        }
+    // Calculate normal with validation
+    const normal = calculateEllipseNormal(intX, intY, h, k, a, b, phi);
+    if (!normal || (Math.abs(normal.x) < 1e-10 && Math.abs(normal.y) < 1e-10)) {
+        return null; // Invalid normal
     }
 
-    
-    return null;
+    return {
+        x: intX,
+        y: intY,
+        normal: normal,
+        distance: distance,
+        t: t
+    };
 }
 
-function findAnalyticalIntersection(ray, h, k, a, b, phi, raySpeed) {
-    // Transform ray to ellipse coordinate system
+function findEllipseIntersection(ray, h, k, a, b, phi) {
+    // Use double precision for critical calculations
     const cos_phi = Math.cos(phi);
     const sin_phi = Math.sin(phi);
     
@@ -77,70 +80,160 @@ function findAnalyticalIntersection(ray, h, k, a, b, phi, raySpeed) {
     const ox = ray.x - h;
     const oy = ray.y - k;
     
-    // Ray direction
-    const dx = ray.dx * raySpeed;
-    const dy = ray.dy * raySpeed;
+    // Ray direction (normalized for better numerical stability)
+    let dx = ray.dx * raySpeed;
+    let dy = ray.dy * raySpeed;
+    const rayLength = Math.sqrt(dx * dx + dy * dy);
+    if (rayLength < 1e-12) return null; // Zero-length ray
     
-    // Rotate to align with ellipse axes
+    // Rotate to ellipse coordinate system
     const rx = ox * cos_phi + oy * sin_phi;
     const ry = -ox * sin_phi + oy * cos_phi;
     const rdx = dx * cos_phi + dy * sin_phi;
     const rdy = -dx * sin_phi + dy * cos_phi;
     
-    // Solve quadratic equation: ((rx + t*rdx)/a)² + ((ry + t*rdy)/b)² = 1
-    const A = (rdx * rdx) / (a * a) + (rdy * rdy) / (b * b);
-    const B = 2 * ((rx * rdx) / (a * a) + (ry * rdy) / (b * b));
-    const C = (rx * rx) / (a * a) + (ry * ry) / (b * b) - 1;
+    // Quadratic coefficients for ellipse intersection
+    const a2 = a * a;
+    const b2 = b * b;
     
+    const A = (rdx * rdx) / a2 + (rdy * rdy) / b2;
+    const B = 2 * ((rx * rdx) / a2 + (ry * rdy) / b2);
+    const C = (rx * rx) / a2 + (ry * ry) / b2 - 1;
+    
+    // Handle near-zero A coefficient (ray nearly tangent to ellipse)
+    if (Math.abs(A) < 1e-12) {
+        if (Math.abs(B) < 1e-12) return null; // Ray doesn't intersect
+        const t = -C / B;
+        if (t >= 0 && t <= 1) {
+            const intX = ray.x + dx * t;
+            const intY = ray.y + dy * t;
+            const distance = Math.sqrt((intX - ray.x) ** 2 + (intY - ray.y) ** 2);
+            return { x: intX, y: intY, t, distance };
+        }
+        return null;
+    }
+    
+    // Solve quadratic equation with improved numerical stability
     const discriminant = B * B - 4 * A * C;
+    if (discriminant < 0) return null; // No real intersection
     
-    if (discriminant < 0 || Math.abs(A) < 1e-10) {
-        return null; // No intersection or ray parallel to ellipse
+    const sqrtDisc = Math.sqrt(discriminant);
+    const invA2 = 1 / (2 * A);
+    
+    // Use more numerically stable method for computing roots
+    let t1, t2;
+    if (B >= 0) {
+        t1 = (-B - sqrtDisc) * invA2;
+        t2 = C / (A * t1);
+    } else {
+        t2 = (-B + sqrtDisc) * invA2;
+        t1 = C / (A * t2);
     }
     
-    const sqrt_disc = Math.sqrt(discriminant);
-    const t1 = (-B - sqrt_disc) / (2 * A);
-    const t2 = (-B + sqrt_disc) / (2 * A);
+    // Choose the appropriate intersection
+    let bestT = null;
+    let bestDistance = Infinity;
     
-    // Choose the appropriate intersection point
-    let t = null;
-    if (t1 >= 0 && t1 <= 1) {
-        t = t1;
-    } else if (t2 >= 0 && t2 <= 1) {
-        t = t2;
-    } else if (t1 > 0 && t1 < t2) {
-        t = t1; // Closest forward intersection
-    } else if (t2 > 0) {
-        t = t2;
+    // Check both intersections and pick the closest valid one
+    for (const t of [t1, t2]) {
+        if (t >= 0 && t <= 1) {
+            const distance = t * rayLength;
+            if (distance < bestDistance) {
+                bestT = t;
+                bestDistance = distance;
+            }
+        }
     }
     
-    if (t === null) return null;
+    if (bestT === null) return null;
     
-    // Calculate intersection point
-    const intX = ray.x + dx * t;
-    const intY = ray.y + dy * t;
+    const intX = ray.x + dx * bestT;
+    const intY = ray.y + dy * bestT;
     
-    return { x: intX, y: intY, t };
+    return { x: intX, y: intY, t: bestT, distance: bestDistance };
+}
+// Convert slope-intercept form to standard line equation (ax + by + c = 0)
+function getEllipseMaskLine(ellipseType) {
+    const { slopet, slopel, interseptt, interseptl } = getEllipseConstants();
+    
+    let slope, intercept, endX;
+    
+    if (ellipseType === "upper") {
+        slope = slopet;
+        intercept = interseptt;
+        endX = z0 + b * Math.sin(theta);
+    } else if (ellipseType === "lower") {
+        slope = slopel;
+        intercept = interseptl;
+        endX = z0 - b * Math.sin(theta);
+    } else {
+        return null;
+    }
+    
+    // Convert from y = mx + c to ax + by + c = 0 form
+    // y = mx + c becomes -mx + y - c = 0
+    // So a = -slope, b = 1, c = -intercept
+    return {
+        a: -slope,
+        b: 1,
+        c: -intercept,
+        slope: slope,
+        intercept: intercept,
+        endX: endX,
+        startX: 0
+    };
 }
 
+// Check if point is above the mask line
+function isPointAboveMaskLine(x, y, maskLine) {
+    if (!maskLine) return false;
+    
+    // Using the line equation ax + by + c = 0
+    // If ax + by + c > 0, point is on one side, if < 0, on the other
+    // For our coordinate system, we want to check if point is above y = mx + c
+    // Which means y > mx + c, or y - mx - c > 0
+    const lineValue = maskLine.a * x + maskLine.b * y + maskLine.c;
+    return lineValue > 0;
+}
 
-function getDistanceToEllipse(x, y, h, k, a, b, phi) {
-    // Translate point to ellipse center
-    const dx = x - h;
-    const dy = y - k;
+// Get signed distance from point to mask line
+function getDistanceToMaskLine(x, y, maskLine) {
+    if (!maskLine) return 0;
     
-    // For rotated ellipse, apply rotation transformation
-    const cosPhi = Math.cos(phi);
-    const sinPhi = Math.sin(phi);
+    const denominator = Math.sqrt(maskLine.a * maskLine.a + maskLine.b * maskLine.b);
+    if (denominator === 0) return 0;
     
-    // Rotate point to align with ellipse axes
-    const xRot = cosPhi * dx + sinPhi * dy;
-    const yRot = -sinPhi * dx + cosPhi * dy;
+    return (maskLine.a * x + maskLine.b * y + maskLine.c) / denominator;
+}
+
+// Enhanced masking check with better boundary handling
+function isPointWithinMask(x, y, maskLine, ellipse) {
+    if (!maskLine) return true; // No masking
     
-    // Apply ellipse equation
-    const ellipseValue = (xRot * xRot) / (a * a) + (yRot * yRot) / (b * b) -1;
+    // Check if point is within the horizontal bounds of the mask line
+    const withinBounds = x >= maskLine.startX && x <= maskLine.endX;
+    if (!withinBounds) {
+        // For points outside the mask line bounds, use a more permissive check
+        // This prevents edge effects at the ends of the mask lines
+        return true;
+    }
     
-    return ellipseValue;
+    const isAbove = isPointAboveMaskLine(x, y, maskLine);
+    const distanceToLine = Math.abs(getDistanceToMaskLine(x, y, maskLine));
+    
+    // Small tolerance for points very close to the mask line
+    const tolerance = 1e-6;
+    const onLine = distanceToLine < tolerance;
+    
+    if (ellipse === "Upper") {
+        // For upper ellipse, mask the upper part (keep points below or on mask line)
+        return isAbove || onLine;
+    } else if (ellipse === "Lower") {
+        // For lower ellipse, mask the lower part (keep points above or on mask line)
+        return !isAbove || onLine;
+    }
+    
+    return true;
 }
 
 function calculateEllipseNormal(x, y, h, k, a, b, phi) {
@@ -154,22 +247,33 @@ function calculateEllipseNormal(x, y, h, k, a, b, phi) {
     const xRot = dx * cosPhi + dy * sinPhi;
     const yRot = -dx * sinPhi + dy * cosPhi;
     
-    // Calculate normal in ellipse coordinate system
+    // Calculate gradient (normal direction) in ellipse coordinate system
     let normalX = (2 * xRot) / (a * a);
     let normalY = (2 * yRot) / (b * b);
     
+    // Normalize with validation
     const normalMag = Math.sqrt(normalX * normalX + normalY * normalY);
-    if (normalMag > 0) {
-        normalX /= normalMag;
-        normalY /= normalMag;
-    }
+    if (normalMag < 1e-10) return null; // Invalid normal
+    
+    normalX /= normalMag;
+    normalY /= normalMag;
     
     // Rotate normal back to world coordinates
     const worldNormalX = normalX * cosPhi - normalY * sinPhi;
     const worldNormalY = normalX * sinPhi + normalY * cosPhi;
     
+    // Ensure normal points outward from ellipse
+    const centerToPoint = { x: dx, y: dy };
+    const dotProduct = worldNormalX * centerToPoint.x + worldNormalY * centerToPoint.y;
+    
+    if (dotProduct < 0) {
+        // Flip normal to point outward
+        return { x: -worldNormalX, y: -worldNormalY };
+    }
+    
     return { x: worldNormalX, y: worldNormalY };
 }
+
 
 function getEllipseConstants() {
     

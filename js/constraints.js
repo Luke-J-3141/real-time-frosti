@@ -1,34 +1,4 @@
 
-// Define masking lines for each ellipse
-function getEllipseMaskLine(ellipseType) {
-    const { slopet, slopel, interseptt, interseptl} = getEllipseConstants();
-    
-    if (ellipseType === 'upper') {
-        return {
-            slope: slopet,
-            intercept: interseptt, // y-intercept
-        };
-    }
-    else if (ellipseType === 'lower') {
-        return {
-            slope: slopel,
-            intercept: interseptl, // y-intercept
-        };
-    }
-}
-
-function isPointAboveEllipse(x, y, ellipseType) {
-    
-}
-
-
-function isPointAboveMaskLine(x, y, maskLine) {
-    // Line equation: y = slope * x + intercept
-    const lineY = maskLine.slope * x + maskLine.intercept;
-    return y < lineY; // Point is above the line
-
-}
-
 function isLeftOfSourcePlane(x, y) {
     const { x1, y1, x2, y2 } = computeSourceLine();
     

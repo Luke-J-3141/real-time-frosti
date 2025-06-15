@@ -33,10 +33,21 @@
                             <button id="startBtn">Start Simulation</button>
                             <button id="resetBtn">Reset</button>
                             <button id="clearRay">Clear Rays</button> 
-                            <button id="clearHist">Clear Histogram</button> 
                         </div>
                     </div>
                 </div>
+
+                <div class="control-section">
+                    <h3>Overlay Controls</h3>
+                    <div class="control-content">
+                        <div class="button-group">
+                            <button id="resetOverlays">Reset Overlays</button>
+                            <button id="toggleKDE">Toggle KDE</button>
+                            <button id="toggleHistogram">Toggle Histogram</button>
+                            <button id="toggleThermalOverlay">Toggle Thermal Overlay</button>
+                        </div>
+                    </div>
+                </div>            
                 
                 <div class="control-section">
                     <h3>Ray Parameters</h3>
@@ -92,7 +103,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="physics-info">
                     <strong>Help:</strong><br>
                     Click 'z' key to see hotkey assignments for the simulation.<br>
@@ -194,10 +204,12 @@
 
             "Heating" Overlay:
             t - Toggle overlay visibility
-            - - Decrease local radius (-2mm)
-            + - Increase local radius (+2mm)
+            - - Decrease 'Diffusion' rate (-0.1)
+            + - Increase 'Diffusion' rate (+0.1)
             [ - Decrease tint strength (-0.1)
             ] - Increase tint strength (+0.1)
+            < - Decrease something
+            > - Increase something
             `;
             
             document.body.appendChild(helpElement);

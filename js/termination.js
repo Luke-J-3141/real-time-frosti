@@ -1,12 +1,14 @@
-
 // Termination line parameters
 let terminationBounds = R_tm; // bounds of TM in y-direction
 const terminationX = 0; // x-coordinate of the termination line
 
 // Counter for collision positions
 let terminationCounts = new Map(); // Maps y-position to count
-const binSize = 1; // Size of y-bins for counting collisions
+const binSize = 2; // Size of y-bins for counting collisions
 
+// Performance tracking
+let terminationCallCount = 0;
+let totalTerminationTime = 0;
 
 // Function to get binned y-position for counting
 function getBinnedY(y) {
@@ -15,10 +17,19 @@ function getBinnedY(y) {
 
 // Function to check if a ray intersects with the termination line
 function checkTerminationCollision(ray) {
-    if (!ray.active) return false;
+    const startTime = performance.now();
+    terminationCallCount++;
+    
+    if (!ray.active) {
+        totalTerminationTime += (performance.now() - startTime);
+        return false;
+    }
 
     const path = ray.path;
-    if (path.length < 2) return false;
+    if (path.length < 2) {
+        totalTerminationTime += (performance.now() - startTime);
+        return false;
+    }
     
     // Get the last two points to check for line segment intersection
     const p1 = path[path.length - 2];
@@ -47,16 +58,17 @@ function checkTerminationCollision(ray) {
             const binnedY = getBinnedY(intersectionY);
             terminationCounts.set(binnedY, (terminationCounts.get(binnedY) || 0) + 1);
             
+            totalTerminationTime += (performance.now() - startTime);
             return true;
         }
     }
     
+    totalTerminationTime += (performance.now() - startTime);
     return false;
 }
 
 // Function to get termination statistics
 function getTerminationStats() {
-    
     const stats = {
         totalTerminations: 0,
         distribution: new Map(terminationCounts),
@@ -75,8 +87,62 @@ function getTerminationStats() {
     return stats;
 }
 
+// Comprehensive stats function - call this to diagnose performance/memory issues
+function getTerminationDiagnostics() {
+    const mapSize = terminationCounts.size;
+    const maxPossibleBins = Math.ceil((2 * terminationBounds) / binSize);
+    const stats = getTerminationStats();
+    const avgTimePerCall = terminationCallCount > 0 ? (totalTerminationTime / terminationCallCount) : 0;
+    
+    // Generate warnings and recommendations
+    const warnings = [];
+    const recommendations = [];
+    
+    if (avgTimePerCall > 0.1) warnings.push('Slow performance: ' + avgTimePerCall.toFixed(3) + 'ms per call');
+    if (mapSize > 1000) warnings.push('High memory usage: ' + mapSize + ' map entries');
+    if (mapSize > maxPossibleBins * 0.8) warnings.push('Map nearly full: ' + ((mapSize/maxPossibleBins)*100).toFixed(1) + '%');
+    
+    if (mapSize > 1000) recommendations.push('Increase binSize or clear counts periodically');
+    if (avgTimePerCall > 0.1) recommendations.push('Consider optimizing collision detection');
+    if (mapSize === 0 && terminationCallCount > 100) recommendations.push('Check if rays are reaching termination line');
+    
+    // Calculate health score
+    let healthScore = 100;
+    if (mapSize > 1000) healthScore -= 30;
+    if (avgTimePerCall > 0.1) healthScore -= 40;
+    if (mapSize > maxPossibleBins * 0.9) healthScore -= 20;
+    healthScore = Math.max(0, healthScore);
+    
+    return {
+        // Performance metrics
+        totalCalls: terminationCallCount,
+        totalTimeMs: totalTerminationTime.toFixed(2),
+        avgTimePerCallMs: avgTimePerCall.toFixed(4),
+        
+        // Memory metrics
+        mapEntries: mapSize,
+        estimatedMemoryKB: ((mapSize * 48) / 1024).toFixed(2), // rough estimate
+        maxPossibleBins: maxPossibleBins,
+        memoryUtilization: ((mapSize / maxPossibleBins) * 100).toFixed(1) + '%',
+        
+        // Statistics
+        totalTerminations: stats.totalTerminations,
+        
+        // Health indicators
+        healthScore: healthScore,
+        warnings: warnings,
+        recommendations: recommendations,
+        
+        // Quick diagnosis
+        status: healthScore > 80 ? 'HEALTHY' : 
+                healthScore > 50 ? 'DEGRADED' : 'CRITICAL'
+    };
+}
+
 // Function to clear termination counts
 function clearTerminationCounts() {
     terminationCounts.clear();
+    // Reset performance counters too
+    terminationCallCount = 0;
+    totalTerminationTime = 0;
 }
-
