@@ -1,3 +1,125 @@
+/*
+ * MOBILE RESPONSIVE UI SYSTEM
+ * ===========================
+ * 
+ * Adaptive user interface system that provides mobile-optimized controls and interactions.
+ * Implements collapsible sections, touch-friendly interactions, and responsive design patterns.
+ * 
+ * INITIALIZATION SYSTEM:
+ * 
+ * isMobileControlsInitialized (boolean)
+ *   - Prevents duplicate event listener registration
+ *   - Tracks initialization state for resize handling
+ *   - Returns: boolean flag indicating mobile features status
+ * 
+ * initializeMobileFeatures()
+ *   - Main initialization function for mobile-specific UI enhancements
+ *   - Activates only on devices with screen width <= 1024px
+ *   - Sets up collapsible sections with touch and click handlers
+ *   - Auto-collapses sections on small screens (width <= 600px)
+ *   - Returns: void (modifies DOM and sets up event listeners)
+ * 
+ * INTERACTION HANDLING:
+ * 
+ * toggleSection(e)
+ *   - Event handler for collapsible section headers
+ *   - Toggles 'collapsed' class on parent control section
+ *   - Provides haptic feedback via navigator.vibrate() if available
+ *   - Prevents event propagation to avoid conflicts
+ *   - Returns: void (modifies section visibility state)
+ * 
+ * Event Listeners Setup:
+ *   - Dual event handling: 'click' for desktop, 'touchend' for mobile
+ *   - Removes existing listeners before adding new ones (prevents duplicates)
+ *   - Implements proper touch event handling with preventDefault()
+ *   - Adds visual feedback styling (cursor, user-select properties)
+ * 
+ * RESPONSIVE BEHAVIOR:
+ * 
+ * Screen Width Breakpoints:
+ *   - <= 1024px: Enables mobile features and collapsible sections
+ *   - <= 600px: Auto-collapses Ray Parameters and Reflector Geometry sections
+ *   - Maintains desktop behavior on larger screens
+ * 
+ * Resize Handling:
+ *   - Debounced resize listener (250ms delay) for performance
+ *   - Reinitializes mobile features when crossing breakpoint thresholds
+ *   - Resets initialization flag when switching between mobile/desktop modes
+ *   - Returns: void (manages responsive state transitions)
+ * 
+ * VISUAL ENHANCEMENTS:
+ * 
+ * CSS Injection System:
+ *   - Dynamically injects mobile-specific styles via JavaScript
+ *   - Prevents duplicate style injection with unique ID check
+ *   - Ensures styles are available even if CSS file is missing mobile rules
+ * 
+ * Mobile Style Features:
+ *   - Animated expand/collapse transitions (max-height, opacity)
+ *   - Touch-friendly header targets (minimum 44px height)
+ *   - Visual indicators (arrow icons that rotate on collapse)
+ *   - Prevents text selection on interactive headers
+ *   - Smooth CSS transitions for professional feel
+ * 
+ * ACCESSIBILITY FEATURES:
+ * 
+ * Touch Optimization:
+ *   - touch-action: manipulation for better touch response
+ *   - Minimum touch target sizes following mobile guidelines
+ *   - Haptic feedback for touch interactions where supported
+ *   - Proper event handling to prevent scroll conflicts
+ * 
+ * User Experience:
+ *   - Visual feedback with arrow rotation animations
+ *   - Smooth expand/collapse transitions
+ *   - Prevents accidental text selection on headers
+ *   - Maintains accessibility while optimizing for touch
+ * 
+ * INTEGRATION NOTES:
+ * 
+ * DOM Requirements:
+ *   - Expects .control-section elements with h3 headers
+ *   - Requires .control-content containers for collapsible content
+ *   - Works with existing HTML structure without modifications
+ * 
+ * Conflict Prevention:
+ *   - Designed to work alongside existing canvas touch handlers
+ *   - Uses event.stopPropagation() to prevent conflicts
+ *   - Debounces resize events to prevent performance issues
+ *   - Checks for existing mobile features before initialization
+ * 
+ * Browser Support:
+ *   - Uses modern CSS features (flexbox, transforms, transitions)
+ *   - Gracefully degrades on older browsers
+ *   - Checks for navigator.vibrate() support before using
+ *   - Uses vendor prefixes for broader compatibility
+ * 
+ * STATE MANAGEMENT:
+ * 
+ * Section State:
+ *   - Uses CSS classes for state management (.collapsed)
+ *   - Persistent across page interactions
+ *   - Automatically managed based on screen size
+ *   - No external state storage required
+ * 
+ * Initialization State:
+ *   - Tracks whether mobile features are active
+ *   - Prevents duplicate setup on resize events
+ *   - Allows clean reinitialization when needed
+ * 
+ * PERFORMANCE CONSIDERATIONS:
+ * 
+ * Debounced Events:
+ *   - Resize handler debounced to prevent excessive calls
+ *   - Smooth transitions without blocking main thread
+ *   - Efficient DOM manipulation with minimal reflows
+ * 
+ * Event Management:
+ *   - Proper cleanup of event listeners during reinitialization
+ *   - Prevents memory leaks from duplicate listeners
+ *   - Uses event delegation patterns where appropriate
+ */
+
 // Mobile: Collapsible sections - Improved version
 let isMobileControlsInitialized = false;
 

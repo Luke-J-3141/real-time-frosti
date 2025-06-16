@@ -1,5 +1,69 @@
-/* Your existing CSS with mobile enhancements */
-* {
+/*
+# Mobile-First Responsive CSS Framework for Interactive Canvas Applications
+
+## Overview
+This CSS framework provides a comprehensive mobile-first responsive design system optimized for interactive canvas-based applications with control panels. Features smooth animations, touch-friendly interfaces, and professional dark theme aesthetics.
+
+## Key Features & Functions
+
+### Layout System
+- **Mobile-First Grid**: Single column on mobile, dual-column (canvas + controls) on desktop
+- **Responsive Container**: Adaptive padding and spacing across breakpoints
+- **Viewport Optimization**: Full-height layouts with proper mobile viewport handling
+
+### Canvas Integration
+- **Responsive Canvas Container**: Maintains aspect ratio on mobile, fills viewport on desktop
+- **Touch-Optimized Interactions**: Prevents unwanted text selection and tap highlights
+- **Visual Enhancements**: Gradient backgrounds, subtle grid overlays, and depth shadows
+- **Zoom Controls**: Floating zoom buttons with backdrop blur effects
+
+### Control Panel System
+- **Collapsible Sections**: Mobile-friendly accordion panels with smooth animations
+- **Desktop Always-Expanded**: Automatic expansion on larger screens
+- **Scrollable Content**: Custom scrollbars with gradient styling
+- **Touch-Friendly Targets**: Minimum 44px touch targets for mobile accessibility
+
+### Input Components
+- **Enhanced Range Sliders**: Custom-styled with gradient thumbs and larger touch areas
+- **Responsive Buttons**: Gradient backgrounds with hover animations and proper spacing
+- **Value Displays**: Real-time value indicators with styled containers
+- **Button Groups**: Flexible layouts that stack on mobile
+
+### Mobile Optimizations
+- **Prevent Selection Flash**: Disabled text selection on interactive elements
+- **Touch Behavior**: Proper touch-action and tap highlight removal
+- **Smooth Animations**: Hardware-accelerated transitions with cubic-bezier easing
+- **Accessibility**: Focus states and proper contrast ratios maintained
+
+### Visual Theme
+- **Dark Gradient Theme**: Sophisticated dark blue gradient backgrounds
+- **Glassmorphism Effects**: Backdrop blur and transparency layers
+- **Color System**: Blue-to-green gradient accents throughout
+- **Typography**: System font stack with proper sizing hierarchy
+
+## Returns/Provides
+- Fully responsive layout system for canvas + controls interfaces
+- Touch-optimized mobile experience with collapsible panels
+- Professional dark theme with consistent visual language
+- Smooth animations and transitions for enhanced UX
+- Cross-browser compatibility with proper fallbacks
+- Accessibility features including focus states and touch targets
+
+## Usage Context
+Ideal for interactive data visualization tools, simulation interfaces, creative applications, 
+or any canvas-based web application requiring responsive controls and professional aesthetics. 
+The framework handles the complete UI shell, leaving canvas content implementation to the application logic.
+*/
+
+.controls-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #3b82f6, #d4a500);
+        border-radius: 4px;
+        border: 1px solid rgba(0, 17, 36, 0.3);
+    }
+
+    .controls-content::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #3b82f6, #b8950a);
+    }* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -21,7 +85,7 @@ input, textarea, .selectable-text {
 }
 
 body {
-    background: radial-gradient(ellipse at top, #0f172a 0%, #020617 100%);
+    background: radial-gradient(ellipse at top, #1e3a5f 0%, #0f1a2e 100%);
     background-attachment: fixed;
     display: flex;
     justify-content: center;
@@ -31,8 +95,25 @@ body {
     color: #f8fafc;
     line-height: 1.5;
     overflow-x: hidden;
+    /* UCR Physics logo background */
+    position: relative;
     /* Prevent bounce scrolling on iOS */
     -webkit-overflow-scrolling: touch;
+}
+
+/* UCR Physics Logo Background */
+body::before {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(58%, -143%);
+    width: 30vw;
+    height: 50vh;
+    background: url('https://www.physics.ucr.edu/sites/default/files/UCRPnA_banner.png') center/contain no-repeat;
+    opacity: 0.8;
+    z-index: -1;
+    pointer-events: none;
 }
 
 /* Main Container - Mobile First */
@@ -59,10 +140,10 @@ body {
     position: relative;
     border-radius: 16px;
     overflow: hidden;
-    background: linear-gradient(145deg, #1e293b, #0f172a);
+    background: linear-gradient(145deg, #1e3a5f, #1e3a5f);
     box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(148, 163, 184, 0.05);
+        0 25px 50px -12px rgba(0, 17, 36, 0.8),
+        0 0 0 1px rgba(59, 130, 246, 0.1);
     backdrop-filter: blur(8px);
     /* Mobile: Make canvas responsive */
     width: 100%;
@@ -81,9 +162,9 @@ body {
 canvas {
     background: transparent !important;
     position: relative;
-    z-index: 2;
+    z-index: 1;
     border-radius: 14px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 1px 0 rgba(255, 215, 0, 0.1);
     width: 100%;
     height: auto;
     max-width: 100%;
@@ -104,12 +185,12 @@ canvas:hover {
     width: 100%;
     max-width: 500px;
     margin: 0 auto;
-    background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(145deg, #1e3a5f 0%, #1e3a5f 100%);
     border-radius: 20px;
-    border: 1px solid rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
     box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.6),
-        inset 0 1px 0 rgba(148, 163, 184, 0.1);
+        0 25px 50px -12px rgba(0, 17, 36, 0.6),
+        inset 0 1px 0 rgba(255, 215, 0, 0.1);
     backdrop-filter: blur(12px);
     /* Mobile: No height restriction */
     max-height: none;
@@ -128,15 +209,15 @@ canvas:hover {
 
 .controls-header {
     padding: 24px 24px 16px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 139, 34, 0.1));
-    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(255, 215, 0, 0.1));
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: 20px 20px 0 0;
 }
 
 .controls-title {
     font-size: 18px;
     font-weight: 700;
-    background: linear-gradient(135deg, #3b82f6, #228b22);
+    background: linear-gradient(135deg, #3b82f6, #e6b800);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -171,18 +252,18 @@ canvas:hover {
     }
 
     .controls-content::-webkit-scrollbar-track {
-        background: rgba(15, 23, 42, 0.5);
+        background: rgba(0, 27, 61, 0.5);
         border-radius: 4px;
     }
 
     .controls-content::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #3b82f6, #228b22);
+        background: linear-gradient(135deg, #3b82f6, #FFD700);
         border-radius: 4px;
-        border: 1px solid rgba(15, 23, 42, 0.3);
+        border: 1px solid rgba(0, 27, 61, 0.3);
     }
 
     .controls-content::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #3b82f6, #228b22);
+        background: linear-gradient(135deg, #2563eb, #FFD700);
     }
 }
 
@@ -190,9 +271,9 @@ canvas:hover {
 .control-section {
     margin-bottom: 20px;
     padding: 16px;
-    background: rgba(30, 41, 59, 0.4);
+    background: rgba(30, 58, 95, 0.4);
     border-radius: 12px;
-    border: 1px solid rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
     position: relative;
     overflow: hidden;
     /* Improved mobile collapsible behavior */
@@ -206,7 +287,7 @@ canvas:hover {
     left: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, #3b82f6, #228b22, #32cd32);
+    background: linear-gradient(90deg, #3b82f6, #e6b800, #d4a500);
 }
 
 .control-section h3 {
@@ -222,7 +303,7 @@ canvas:hover {
     /* Mobile: Larger tap target with better touch response */
     min-height: 48px;
     position: relative;
-    z-index: 10;
+    z-index: 2;
     /* Prevent text selection on headers */
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -236,7 +317,7 @@ canvas:hover {
     content: '';
     width: 6px;
     height: 6px;
-    background: linear-gradient(135deg, #3b82f6, #228b22);
+    background: linear-gradient(135deg, #3b82f6, #e6b800);
     border-radius: 50%;
 }
 
@@ -247,6 +328,7 @@ canvas:hover {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 12px;
     transform-origin: center;
+    color: #e6b800;
 }
 
 .control-section.collapsed h3::after {
@@ -312,10 +394,10 @@ label {
     font-size: 13px;
     font-weight: 600;
     color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(59, 130, 246, 0.15);
     padding: 4px 10px;
     border-radius: 6px;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     min-width: 50px;
     text-align: center;
 }
@@ -325,7 +407,7 @@ input[type="range"] {
     width: 100%;
     height: 12px;
     border-radius: 6px;
-    background: linear-gradient(90deg, #1e293b, #334155);
+    background: linear-gradient(90deg, #0f1a2e, #1e3a5f);
     outline: none;
     margin-bottom: 16px;
     appearance: none;
@@ -344,7 +426,7 @@ input[type="range"]::-webkit-slider-thumb {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #228b22);
+    background: linear-gradient(135deg, #3b82f6, #d4a500);
     cursor: pointer;
     border: 3px solid #ffffff;
     box-shadow: 
@@ -357,14 +439,14 @@ input[type="range"]::-webkit-slider-thumb:hover {
     transform: scale(1.1);
     box-shadow: 
         0 6px 16px rgba(59, 130, 246, 0.5),
-        0 0 0 6px rgba(59, 130, 246, 0.15);
+        0 0 0 6px rgba(230, 184, 0, 0.15);
 }
 
 input[type="range"]::-moz-range-thumb {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #228b22);
+    background: linear-gradient(135deg, #3b82f6, #d4a500);
     cursor: pointer;
     border: 3px solid #ffffff;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
@@ -372,7 +454,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 input[type="range"]::-moz-range-track {
-    background: linear-gradient(90deg, #1e293b, #334155);
+    background: linear-gradient(90deg, #0f1a2e, #1e3a5f);
     height: 12px;
     border-radius: 6px;
     border: none;
@@ -380,7 +462,7 @@ input[type="range"]::-moz-range-track {
 
 /* Enhanced Buttons - Mobile Friendly */
 button {
-    background: linear-gradient(135deg, #3b82f6, #228b22);
+    background: linear-gradient(135deg, #3b82f6, #ffd9007c);
     color: rgb(255, 255, 255);
     border: none;
     padding: 16px 24px;
@@ -394,7 +476,7 @@ button {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 
         0 4px 12px rgba(59, 130, 246, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        inset 0 1px 0 rgba(230, 184, 0, 0.2);
     position: relative;
     overflow: hidden;
     /* Mobile: Larger touch target */
@@ -413,7 +495,8 @@ button:hover {
     transform: translateY(-2px);
     box-shadow: 
         0 8px 20px rgba(59, 130, 246, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        inset 0 1px 0 rgba(230, 230, 0, 0.3);
+    background: linear-gradient(135deg, #2563eb, #ffd9007c);
 }
 
 button:active {
@@ -444,7 +527,7 @@ button:active {
     position: absolute;
     top: 16px;
     right: 16px;
-    z-index: 3;
+    z-index: 2;
     display: flex;
     gap: 8px;
 }
@@ -453,8 +536,8 @@ button:active {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(30, 58, 95, 0.8);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     color: white;
     cursor: pointer;
     display: flex;
@@ -479,8 +562,8 @@ button:active {
 }
 
 .zoom-btn:hover {
-    background: rgba(59, 130, 246, 0.3);
-    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.4);
+    border-color: rgba(230, 184, 0, 0.5);
     transform: scale(1.05);
 }
 
@@ -488,12 +571,12 @@ button:active {
     position: absolute;
     bottom: 16px;
     left: 16px;
-    background: rgba(30, 41, 59, 0.8);
+    background: rgba(30, 58, 95, 0.8);
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 12px;
     color: #cbd5e1;
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     backdrop-filter: blur(8px);
     /* Prevent text selection */
     -webkit-user-select: none;
@@ -504,13 +587,13 @@ button:active {
 
 /* Legend and Info Sections */
 .legend {
-    background: rgba(30, 41, 59, 0.6);
+    background: rgba(30, 58, 95, 0.6);
     padding: 16px;
     border-radius: 10px;
     font-size: 13px;
     line-height: 1.6;
     margin-top: 20px;
-    border: 1px solid rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .legend-item {
@@ -536,19 +619,19 @@ button:active {
     height: 20px;
     margin-right: 12px;
     border-radius: 4px;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    box-shadow: 0 2px 4px rgba(0, 27, 61, 0.3);
     flex-shrink: 0;
 }
 
 .physics-info {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 139, 34, 0.1));
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(230, 184, 0, 0.1));
     padding: 16px;
     border-radius: 10px;
     font-size: 13px;
     color: #94a3b8;
     margin-top: 16px;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     backdrop-filter: blur(4px);
     line-height: 1.5;
     /* Allow text selection for info content */
@@ -567,8 +650,8 @@ button:active {
     right: 0;
     bottom: 0;
     background: 
-        linear-gradient(90deg, rgba(148, 163, 184, 0.01) 1px, transparent 1px),
-        linear-gradient(rgba(148, 163, 184, 0.01) 1px, transparent 1px);
+        linear-gradient(90deg, rgba(59, 130, 246, 0.02) 1px, transparent 1px),
+        linear-gradient(rgba(59, 130, 246, 0.02) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
     z-index: 1;
@@ -582,7 +665,7 @@ button:active {
     left: -1px;
     right: -1px;
     bottom: -1px;
-    background: rgba(148, 163, 184, 0.1);
+    background: rgba(59, 130, 246, 0.15);
     border-radius: 17px;
     z-index: -1;
     opacity: 0.3;
@@ -597,15 +680,15 @@ button:active {
     pointer-events: none;
     z-index: 2;
     background: 
-        linear-gradient(90deg, transparent 49.8%, rgba(148, 163, 184, 0.03) 50%, transparent 50.2%),
-        linear-gradient(180deg, transparent 49.8%, rgba(148, 163, 184, 0.03) 50%, transparent 50.2%);
+        linear-gradient(90deg, transparent 49.8%, rgba(59, 130, 246, 0.05) 50%, transparent 50.2%),
+        linear-gradient(180deg, transparent 49.8%, rgba(59, 130, 246, 0.05) 50%, transparent 50.2%);
     background-size: 60px 60px;
     opacity: 0;
     transition: opacity 0.5s ease;
 }
 
 .canvas-container:hover .graph-overlay {
-    opacity: 0.3;
+    opacity: 0.4;
 }
 
 /* Mobile specific adjustments */
@@ -653,19 +736,19 @@ button:active {
     }
     
     .control-section h3:active {
-        background-color: rgba(59, 130, 246, 0.1);
+        background-color: rgba(59, 130, 246, 0.15);
         border-radius: 8px;
     }
 }
 
 /* Focus states for accessibility */
 input[type="range"]:focus {
-    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline: 2px solid rgba(255, 215, 0, 0.5);
     outline-offset: 2px;
 }
 
 button:focus {
-    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline: 2px solid rgba(255, 215, 0, 0.5);
     outline-offset: 2px;
 }
 
@@ -694,11 +777,11 @@ html {
 
 /* Prevent unwanted highlighting/selection globally */
 ::selection {
-    background: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.4);
     color: white;
 }
 
 ::-moz-selection {
-    background: rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.4);
     color: white;
 }

@@ -1,3 +1,92 @@
+
+/*
+ * HISTOGRAM OVERLAY SYSTEM
+ * ========================
+ * 
+ * Real-time histogram visualization system that overlays ray termination data
+ * directly onto the main canvas. Provides performance monitoring and diagnostics.
+ * 
+ * CORE RENDERING FUNCTIONS:
+ * 
+ * drawHistogramOnCanvas(ctx)
+ *   - Main rendering function for histogram bars on canvas
+ *   - Applies canvas transformations to match plot coordinate system
+ *   - Uses color interpolation based on count intensity (red to orange gradient)
+ *   - Returns: void (renders directly to canvas context)
+ * 
+ * renderHistogramOverlay(ctx, terminationBounds)
+ *   - Wrapper function for histogram rendering in main render loop
+ *   - Call after drawing rays but before presenting frame
+ *   - Returns: void
+ * 
+ * getBarColor(count, maxCount)
+ *   - Calculates color interpolation for histogram bars
+ *   - Maps count intensity to red-orange gradient
+ *   - Returns: RGB color string for bar rendering
+ * 
+ * CONTROL FUNCTIONS:
+ * 
+ * toggleHistogram()
+ *   - Toggles histogram visibility on/off
+ *   - Updates global histogramVisible flag
+ *   - Returns: void (logs state change to console)
+ * 
+ * resetHistogram()
+ *   - Clears all histogram data and performance counters
+ *   - Calls clearTerminationCounts() from physics module
+ *   - Returns: void
+ * 
+ * setHistogramConfig(config)
+ *   - Updates histogram visual configuration
+ *   - Merges provided config with HISTOGRAM_CONFIG object
+ *   - Returns: void
+ * 
+ * DIAGNOSTICS FUNCTIONS:
+ * 
+ * getHistogramDiagnostics()
+ *   - Comprehensive performance and health analysis
+ *   - Calculates rendering metrics, health score, and provides recommendations
+ *   - Returns: diagnostic object with {totalRenders, avgRenderTimeMs, barsToRender, 
+ *     healthScore, warnings, recommendations, status, renderingImpact, etc.}
+ * 
+ * CONFIGURATION:
+ * 
+ * HISTOGRAM_CONFIG object controls visual appearance:
+ *   - maxBarLength: 150px maximum bar length
+ *   - barWidth: 4px bar height
+ *   - barSpacing: 2px gap between bars
+ *   - xOffset: 10px distance from hit position
+ *   - opacity: 0.7 bar transparency
+ *   - Color scheme: red to orange gradient based on count intensity
+ * 
+ * PERFORMANCE TRACKING:
+ * - histogramRenderCount: total number of render calls
+ * - totalHistogramRenderTime: cumulative rendering time in milliseconds
+ * - Automatic performance warnings when rendering exceeds thresholds
+ * - Health scoring system (0-100) based on performance metrics
+ * 
+ * KEYBOARD CONTROLS:
+ * - 'H' key: Toggle histogram visibility
+ * - 'R' key: Reset histogram and KDE data
+ * 
+ * INTEGRATION REQUIREMENTS:
+ * - Depends on getTerminationStats() from physics module
+ * - Expects global variables: zoomLevel, panX, panY for canvas transformations
+ * - Requires clearTerminationCounts() and resetKDE() functions
+ * - Canvas context should be available in main render loop
+ * 
+ * COORDINATE SYSTEM:
+ * - Uses plot coordinate system with canvas transformations
+ * - Bars grow leftward from origin (x = 0) in plot space
+ * - Y-coordinates match bin values directly
+ * - Scaling adjusts with zoom level to maintain visual consistency
+ * 
+ * PERFORMANCE NOTES:
+ * - Optimized for real-time rendering in animation loops
+ * - Color calculations cached per frame
+ * - Canvas state saving/restoration for isolation
+ * - Diagnostic warnings for performance degradation scenarios
+ */
 // <====== Comments ======>
 // TODO:
 // Correctly create reset histogram function
@@ -46,12 +135,10 @@ function getBarColor(count, maxCount) {
 }
 
 // Draw histogram bars on the main canvas  
-function drawHistogramOnCanvas(ctx) {
+function drawHistogramOnCanvas(ctx, stats, terminationBounds) {
     const startTime = performance.now();
     histogramRenderCount++;
     
-    // Get stats from your physics module
-    const stats = getTerminationStats();
     
     // Check if we have data
     if (!histogramVisible || !stats || stats.distribution.size === 0) {

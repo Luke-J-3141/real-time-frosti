@@ -1,3 +1,73 @@
+/*
+ * ELLIPSE RAY INTERSECTION MODULE
+ * ==============================
+ * 
+ * This module provides functions for detecting intersections between rays and rotated ellipses
+ * with masking capabilities. Designed for optical ray tracing applications.
+ * 
+ * MAIN FUNCTIONS:
+ * 
+ * checkEllipseIntersection(ray)
+ *   - Primary intersection function that checks both upper and lower ellipses
+ *   - Applies masking lines to limit valid intersection regions
+ *   - Returns: normal vector of closest valid intersection, or null if no intersection
+ * 
+ * checkSingleEllipseIntersection(ray, h, k, a, b, phi, maskLine, ellipse)
+ *   - Tests intersection with a single ellipse using given parameters
+ *   - Validates intersection within ray segment and mask boundaries
+ *   - Returns: intersection object {x, y, normal, distance, t} or null
+ * 
+ * findEllipseIntersection(ray, h, k, a, b, phi)
+ *   - Core mathematical intersection calculation using quadratic formula
+ *   - Handles numerical stability and edge cases (tangent rays, zero coefficients)
+ *   - Returns: intersection point {x, y, t, distance} or null
+ * 
+ * MASKING FUNCTIONS:
+ * 
+ * getEllipseMaskLine(ellipseType)
+ *   - Creates masking line definition for "upper" or "lower" ellipse
+ *   - Converts slope-intercept to standard line equation form
+ *   - Returns: line object {a, b, c, slope, intercept, endX, startX}
+ * 
+ * isPointWithinMask(x, y, maskLine, ellipse)
+ *   - Determines if intersection point should be masked (excluded)
+ *   - Handles boundary conditions and tolerance for edge cases
+ *   - Returns: boolean indicating if point is valid (not masked)
+ * 
+ * isPointAboveMaskLine(x, y, maskLine)
+ *   - Geometric test for point position relative to mask line
+ *   - Returns: boolean true if point is above the line
+ * 
+ * getDistanceToMaskLine(x, y, maskLine)
+ *   - Calculates signed perpendicular distance from point to mask line
+ *   - Returns: signed distance value (positive/negative indicates side)
+ * 
+ * UTILITY FUNCTIONS:
+ * 
+ * calculateEllipseNormal(x, y, h, k, a, b, phi)
+ *   - Computes outward-pointing normal vector at intersection point
+ *   - Transforms between ellipse and world coordinate systems
+ *   - Returns: normalized normal vector {x, y} or null if invalid
+ * 
+ * getEllipseConstants()
+ *   - Calculates ellipse parameters based on global variables (theta, z0, a, b, etc.)
+ *   - Handles geometric transformations and slope calculations
+ *   - Returns: object with all ellipse parameters {ht, hl, kt, kl, ct, cl, dt, dl, phit, phil, slopet, slopel, interseptt, interseptl}
+ * 
+ * computeSourceLine()
+ *   - Defines the source line geometry for ray generation
+ *   - Returns: line endpoints {x1, y1, x2, y2}
+ * 
+ * DEPENDENCIES:
+ * - Expects global variables: theta, z0, a, b, voffset, raySpeed, dist_sor_tar, sourceLength, verticalOffset, EPS
+ * - Ray object format: {x, y, dx, dy} where (x,y) is origin and (dx,dy) is direction
+ * 
+ * NUMERICAL FEATURES:
+ * - Enhanced numerical stability for near-tangent rays and edge cases
+ * - Tolerance handling for boundary conditions
+ * - Robust quadratic equation solving with improved root computation
+ */
+
 // <====== Comments ======>
 // TODO:
 

@@ -1,5 +1,122 @@
-// KDE (Kernel Density Estimation) fitting functions
-// This provides a smooth, continuous curve that can capture more complex distributions than Gaussian
+/*
+================================================================================
+KDE (KERNEL DENSITY ESTIMATION) SYSTEM - SMOOTH STATISTICAL CURVE FITTING
+================================================================================
+
+This code implements a comprehensive Kernel Density Estimation system for 
+creating smooth, continuous probability density curves from ray termination 
+histogram data. Provides multiple kernel functions, automatic bandwidth 
+selection, and real-time visualization overlay.
+
+KERNEL FUNCTIONS (KERNEL_FUNCTIONS):
+Available kernel types for density estimation:
+- gaussian: Standard normal distribution kernel (most common)
+- epanechnikov: Optimal efficiency kernel with compact support
+- uniform: Rectangular kernel (simple, less smooth)
+- triangular: Linear decay kernel
+- biweight: Quartic kernel with smooth tapering
+
+Each kernel function takes normalized distance u and returns density weight.
+
+CORE FITTING FUNCTIONS:
+- calculateOptimalBandwidth(data, weights?) → number
+  Implements Silverman's rule of thumb: h = 1.06 * σ * n^(-1/5)
+  Supports weighted data for histogram bin counts
+  Returns optimal smoothing parameter for given dataset
+  Ensures minimum bandwidth of 0.1 to prevent over-fitting
+
+- fitKDEToTerminationData(kernelType?, bandwidth?) → object | null
+  Converts termination histogram into KDE parameters
+  Expands histogram bins into individual data points
+  Calculates statistics: mean, variance, standard deviation
+  Returns: {dataPoints, bandwidth, kernel, mean, standardDeviation, totalPoints}
+
+- evaluateKDE(y, kdeParams) → number
+  Calculates probability density at specific y-coordinate
+  Sums weighted kernel contributions from all data points
+  Formula: density = (1/nh) * Σ K((y-xi)/h) where K is kernel function
+
+CURVE GENERATION FUNCTIONS:
+- generateKDECurve(kdeParams, yMin, yMax, numPoints) → array
+  Creates smooth curve data points for visualization
+  Returns array of {y, density} coordinate pairs
+  Default: 200 points from yMin=-100 to yMax=100
+
+- findKDEModes(kdeParams, yMin, yMax, resolution) → array
+  Identifies local maxima (peaks) in the density function
+  Uses numerical derivative to find peaks
+  Returns array of {position, density} sorted by peak height
+  Useful for identifying multi-modal distributions
+
+VISUALIZATION SYSTEM:
+- drawKDEOnCanvas(ctx) → void
+  Renders KDE curve overlay on main canvas
+  Applies same transformation matrix as histogram
+  Supports filled area under curve and outline stroke
+  Scales density values to match histogram bar lengths
+  Automatically determines y-range from termination data
+
+INTERACTIVE CONTROLS:
+- toggleKDE() → void
+  Shows/hides KDE overlay (hotkey: 'K')
+  Automatically refreshes parameters when enabled
+
+- setKDEConfig(config) → void  
+  Updates visualization parameters and refits curve
+  Accepts partial config objects for specific updates
+
+- resetKDE() → void
+  Clears all KDE data and hides overlay
+
+KEYBOARD SHORTCUTS:
+- 'K': Toggle KDE curve visibility on/off
+- 'B': Cycle through kernel functions (gaussian → epanechnikov → uniform → triangular → biweight)
+- 'N': Increase bandwidth by 20% (smoother curve)
+- 'M': Decrease bandwidth by 20% (more detailed curve)
+
+CONFIGURATION (KDE_CONFIG):
+- lineWidth: Curve stroke thickness (default: 2)
+- opacity: Curve transparency (default: 0.8)
+- curveColor: Stroke color (default: '#dc2626' red)
+- fillColor: Fill under curve (default: semi-transparent red)
+- pointDensity: Curve smoothness (default: 300 points)
+- showFill: Enable/disable area fill (default: true)
+- kernelType: Active kernel function (default: 'gaussian')
+- bandwidth: Manual bandwidth override (default: null for auto-calculation)
+
+GLOBAL STATE:
+- kdeVisible: boolean - Current visibility state
+- currentKDEParams: object - Active KDE parameters and data
+- KDE_CONFIG: object - Visualization configuration
+
+STATISTICAL APPLICATIONS:
+- Smooth representation of discrete histogram data
+- Multi-modal distribution detection via mode finding
+- Probability density estimation for continuous variables
+- Comparison with parametric distributions (Gaussian, etc.)
+- Bandwidth sensitivity analysis for data exploration
+
+INTEGRATION WITH HISTOGRAM:
+- Automatically scales to match histogram bar lengths
+- Uses same coordinate transformation for overlay alignment
+- Derives y-range from termination statistics
+- Supports same zoom/pan interactions as histogram
+
+MATHEMATICAL FOUNDATION:
+KDE Formula: f̂(y) = (1/nh) * Σᵢ₌₁ⁿ K((y-yᵢ)/h)
+Where:
+- n: number of data points
+- h: bandwidth (smoothing parameter)  
+- K: kernel function
+- yᵢ: individual data points
+- y: evaluation point
+
+DEPENDENCIES:
+Requires external functions: getTerminationStats()
+Uses global variables: zoomLevel, panX, panY, HISTOGRAM_CONFIG
+================================================================================
+*/
+
 
 // Kernel functions for KDE
 const KERNEL_FUNCTIONS = {
@@ -177,7 +294,7 @@ const KDE_CONFIG = {
 };
 
 // Draw KDE curve on the main canvas
-function drawKDEOnCanvas(ctx) {
+function drawKDEOnCanvas(ctx, stats) {
     
     if (!kdeVisible || !currentKDEParams) return;
        
@@ -192,8 +309,6 @@ function drawKDEOnCanvas(ctx) {
         panX + canvasWidth/2, panY + canvasHeight/2
     );
     
-    // Get termination stats to determine y-range
-    const stats = getTerminationStats();
     if (!stats || stats.distribution.size === 0) {
         ctx.restore();
         return;

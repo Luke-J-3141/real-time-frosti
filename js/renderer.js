@@ -1,3 +1,66 @@
+/*
+================================================================================
+RAY TRACING VISUALIZATION SYSTEM - CORE RENDERING FUNCTIONS
+================================================================================
+
+This code implements a 2D ray tracing visualization system with elliptical 
+reflectors, interactive zoom/pan controls, and statistical analysis overlays.
+
+COORDINATE SYSTEM FUNCTIONS:
+- screenToWorld(screenX, screenY) → {x, y}
+  Converts mouse/screen coordinates to world coordinate system accounting for zoom/pan
+  
+- worldToScreen(worldX, worldY) → {x, y}  
+  Converts world coordinates to screen pixels for canvas rendering
+
+DRAWING FUNCTIONS:
+- drawReflectors()
+  Renders upper and lower elliptical reflectors with masking (portions hidden by mask lines)
+  Uses gold color (#FFD700), dynamic line width based on zoom level
+  Only draws ellipse segments left of source plane and respecting mask boundaries
+  
+- drawRays()
+  Renders ray paths with color-coded segments based on distance traveled
+  Supports opacity control and dynamic line width
+  Each ray segment can have different colors based on distance
+  
+- drawSource()
+  Draws the light source as an orange line segment (#FFA500)
+  Source position computed by computeSourceLine() function
+  
+- drawDiagonalLines_UC()
+  Renders purple dashed reference lines (#8B00FF) 
+  Shows upper/lower boundary lines with slopes/intercepts from ellipse constants
+  Lines extend to source plane boundaries
+  
+- drawMirroredElements()
+  Creates horizontally mirrored copy of all elements below centerline
+  Uses canvas transform to flip vertically around y=0 world coordinate
+  Includes all drawing functions plus overlay elements (histograms, KDE, TM rendering)
+  
+- redraw()
+  Master rendering function - clears canvas and calls all drawing functions
+  Renders: grid, reflectors, rays, source, reference lines, statistical overlays
+  Handles canvas state management and coordinate transformations
+
+DEPENDENCIES:
+Requires external functions: getEllipseConstants(), getEllipseMaskLine(), 
+isPointAboveMaskLine(), isLeftOfSourcePlane(), computeSourceLine(),
+renderHistogramOverlay(), renderTM(), drawKDEOnCanvas(), drawGrid()
+
+GLOBAL VARIABLES USED:
+- ctx: 2D canvas rendering context
+- rays: array of ray objects with path, color, and opacity methods
+- centerX, centerY: canvas center coordinates  
+- panX, panY: current pan offset
+- zoomLevel: current zoom factor
+- canvasWidth, canvasHeight: canvas dimensions
+- terminationBounds: bounds for statistical analysis
+- z0, b, theta: geometric parameters for boundary calculations
+================================================================================
+*/
+
+
 // <====== Comments ======>
 // TODO:
 
@@ -166,6 +229,39 @@ function drawDiagonalLines_UC() {
     ctx.setLineDash([]);
 }
 
+
+function drawMirroredElements(stats) {
+    // Save the current canvas state
+    ctx.save();
+    
+    // Transform to mirror across the horizontal centerline (y = 0 in world coordinates)
+    // First translate to center, then scale vertically by -1, then translate back
+    ctx.translate(centerX + panX, centerY + panY);
+    ctx.scale(1, -1);
+    ctx.translate(-(centerX + panX), -(centerY + panY));
+    
+    // Now draw all elements - they will appear mirrored below the horizontal centerline
+    drawReflectors();
+    drawRays();
+    drawSource();
+    drawDiagonalLines_UC();
+
+    const inverseStats = {
+        ...stats,
+        distribution: new Map()
+    };
+    
+    for (const [key, value] of stats.distribution) {
+        inverseStats.distribution.set(-key, value);
+    }
+
+    renderHistogramOverlay(ctx, inverseStats,  terminationBounds);
+    renderTM(ctx, inverseStats, zoomLevel, panX, panY);
+   
+    // Restore the canvas state
+    ctx.restore();
+}
+
 // Full drawing function
 function redraw() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);  
@@ -176,12 +272,16 @@ function redraw() {
     drawRays();
     drawSource();
     drawDiagonalLines_UC();    
+
+    // Get stats from your physics module
+    const stats = getTerminationStats();
     
     // Update distribution plot
-    renderHistogramOverlay(ctx, terminationBounds);
-    renderTM(ctx, zoomLevel, panX, panY);
-    
-    drawKDEOnCanvas(ctx);
+    renderHistogramOverlay(ctx, stats, terminationBounds);
+    renderTM(ctx, stats, zoomLevel, panX, panY);
+    drawKDEOnCanvas(ctx, stats);
+
+    drawMirroredElements(stats);
     ctx.restore();
 
 }

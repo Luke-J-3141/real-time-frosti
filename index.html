@@ -1,3 +1,83 @@
+<!-- 
+# FROSTI Ray Tracing - Interactive Physics Simulation Application
+
+## Overview
+A comprehensive web-based ray tracing physics simulation built with vanilla JavaScript and HTML5 Canvas. Features real-time ray propagation, interactive reflector geometry controls, and multiple data visualization overlays in a responsive mobile-first interface.
+
+## Core Architecture & Functions
+
+### HTML Structure
+- **Responsive Canvas Container**: Main simulation viewport with zoom controls and info overlay
+- **Collapsible Control Panels**: Mobile-optimized accordion interface for parameter adjustment
+- **Dual-Layout System**: Single column mobile, side-by-side desktop layout
+- **Overlay System**: Grid background, zoom info, and help display integration
+
+### Canvas & Viewport Management
+- **Dynamic Sizing**: Responsive canvas dimensions based on viewport (min 1500px, maintains aspect ratio)
+- **Coordinate System**: Centered origin with configurable zoom/pan state
+- **Touch-Optimized**: Mobile viewport meta tag prevents scaling, maintains usability
+
+### Control Interface Sections
+1. **Simulation Controls**: Start/stop, reset, and ray clearing functions
+2. **Overlay Controls**: Toggle KDE, histogram, thermal overlay, and reset functions  
+3. **Ray Parameters**: Emission rate (1-5), max bounces (0-5), speed (5-50), lifetime (100-800)
+4. **Reflector Geometry**: Source width, tilt angle, distance, target width, vertical offset
+
+### State Management Variables
+- **Viewport State**: `zoomLevel`, `panX`, `panY`, `centerX`, `centerY`
+- **Interaction State**: `isDragging`, `lastMouseX`, `lastMouseY`
+- **Simulation State**: `rays[]`, `isRunning`, `animationId`, `frameCount`
+- **Physics Parameters**: `theta`, `dist_sor_tar`, `sourceLength`, `targetLength`, etc.
+
+### Module Loading System (Dependency Order)
+1. **Core Controls**: `controls-mobile.js`, `unitsGrid.js`, `controls.js`
+2. **Physics Engine**: `geometry.js`, `rays.js`, `renderer.js`, `simulation.js`
+3. **Visualization**: `distribution.js`, `KDE.js`, `testmass_vis.js`
+4. **Interaction**: `zoom.js`, `termination.js`, `constraints.js`
+5. **Utilities**: `preformance.js`
+
+### Interactive Features
+- **Hotkey System**: Comprehensive keyboard controls for overlays and parameters
+- **Help Display**: Toggle-able overlay (Z key) showing all hotkey assignments
+- **Real-time Updates**: Live parameter feedback with immediate visual updates
+- **Mobile Touch**: Optimized for touch interaction with proper gesture handling
+
+### Key Functions & Returns
+
+#### Initialization Functions
+- **Canvas Setup**: Returns configured canvas context with responsive dimensions
+- **Control Binding**: Returns mapped control elements with event listeners
+- **State Initialize**: Returns default simulation parameters and viewport settings
+
+#### Simulation Core
+- **Ray Tracing Engine**: Returns ray intersection calculations and bounce physics
+- **Animation Loop**: Returns frame-based updates with performance monitoring
+- **Physics Integration**: Returns real-time parameter updates affecting ray behavior
+
+#### Visualization Overlays
+- **KDE Overlay**: Returns kernel density estimation visualization of ray distribution
+- **Histogram**: Returns binned frequency distribution of ray impacts
+- **Thermal Overlay**: Returns heat map visualization with configurable diffusion
+- **Grid System**: Returns coordinate reference with unit conversion display
+
+#### User Interaction
+- **Zoom/Pan System**: Returns transformed viewport coordinates for navigation
+- **Parameter Controls**: Returns real-time slider/button input with live value display
+- **Hotkey Handler**: Returns mapped keyboard shortcuts for advanced control
+
+## Usage Context & Integration
+Perfect for educational physics simulations, optical system design, or scientific visualization. The modular architecture allows easy extension of physics models, visualization types, or control interfaces. All code integrates with the mobile-first CSS framework for consistent responsive behavior.
+
+## Performance Considerations
+- Hardware-accelerated canvas rendering
+- Efficient ray-object intersection algorithms  
+- Frame-rate monitoring and adaptive quality
+- Memory management for long-running simulations
+- Touch-optimized interaction response times
+
+-->
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,7 +134,7 @@
                     <div class="control-content">
                         <div class="control-group">
                             <label>Ray Emission Rate <span class="value" id="emissionRateValue">1</span></label>
-                            <input type="range" id="emissionRate" min="1" max="3" step="1" value="1">
+                            <input type="range" id="emissionRate" min="1" max="5" step="1" value="1">
                         </div>
                         
                         <div class="control-group">
@@ -99,13 +179,15 @@
 
                         <div class="control-group">
                             <label>Vertical Offset <span class="value" id="verticalOffsetValue">100 mm</span></label>
-                            <input type="range" id="verticalOffset" min="0" max="20000" step="5" value="10000">
+                            <input type="range" id="verticalOffset" min="1000" max="20000" step="5" value="10000">
                         </div>
                     </div>
                 </div>
                 <div class="physics-info">
-                    <strong>Help:</strong><br>
-                    Click 'z' key to see hotkey assignments for the simulation.<br>
+                    <strong>Description:</strong>
+                    <br>Click 'z' key to see hotkey assignments for the simulation.<br>
+                    <a href="https://experimentalgravity.ucr.edu/" style="color: #6caffc; text-decoration: none;">Richardson Lab UCR</a><br>
+                    <br>FROSTI Ray Tracing</b> is a physics simulation application that allows users to visualize and interact with ray tracing phenomena in a user-friendly interface. The simulation includes various parameters and overlays to enhance the understanding of ray behavior in different scenarios.
                 </div>
             </div>
         </div>
@@ -148,20 +230,28 @@
         let emissionRate, maxBounces, raySpeed, rayLifetime;
         let a, b, z0, voffset;
     </script>
-
+    <!-- Load Controls, Unit conversion, and draw background grid -->
     <script src="js/controls-mobile.js"></script>
     <script src="js/unitsGrid.js"></script>
     <script src="js/controls.js"></script>
+
+    <!-- Load Ray and drawing code -->
     <script src="js/geometry.js"></script>
     <script src="js/rays.js"></script>
     <script src="js/renderer.js"></script>
     <script src="js/simulation.js"></script>
+
+    <!-- Load overlays -->
     <script src="js/distribution.js"></script>
     <script src="js/KDE.js"></script>
+    <script src="js/testmass_vis.js"></script>
+
+    <!-- Load Zoom controls and control functions for reflection and drawing limitations -->
     <script src="js/zoom.js"></script>
     <script src="js/termination.js"></script>
-    <script src="js/testmass_vis.js"></script>
     <script src="js/constraints.js"></script>
+
+    <!-- Load Other -->
     <script src="js/preformance.js"></script>
 
     <script>
@@ -184,7 +274,7 @@
                 font-family: monospace;
                 font-size: 14px;
                 line-height: 1.4;
-                z-index: 1000;
+                z-index: 10;
                 white-space: pre-line;
                 border: 2px solid #4a90e2;
             `;

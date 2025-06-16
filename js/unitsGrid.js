@@ -1,3 +1,61 @@
+/**
+ * GRID AND UNITS SYSTEM
+ * 
+ * This module provides a hierarchical grid system with unit conversion utilities for precise
+ * measurement and visualization. The grid uses adaptive level-of-detail rendering optimized
+ * for zoom ranges from 1% to 5000%, with automatic opacity and line weight adjustments.
+ * 
+ * UNIT CONVERSION:
+ * - PIXELS_PER_MM: 100 (conversion constant)
+ * - MM_PER_PIXEL: 0.01 (inverse conversion)
+ * 
+ * CONVERSION FUNCTIONS:
+ * 
+ * mmToPx(mm)
+ *   - Converts millimeters to pixels using the global scale
+ *   - Returns: number (pixels)
+ * 
+ * pxTomm(px)
+ *   - Converts pixels to millimeters using the global scale
+ *   - Returns: number (millimeters)
+ * 
+ * GRID SYSTEM:
+ * 
+ * GRID_LEVELS Configuration:
+ *   - 5 hierarchical levels: 15mm, 5mm, 1mm, 0.2mm, 0.04mm spacing
+ *   - Each level has: spacing, minZoom, maxZoom, opacity, lineWidth
+ *   - Optimized for 25% to 500% zoom range (TODO: needs tweaking)
+ *   - Automatic fade-in/fade-out based on zoom level
+ * 
+ * drawGrid(ctx)
+ *   - Renders the hierarchical grid system with proper coordinate transforms
+ *   - Calculates visible area to optimize drawing performance
+ *   - Draws only grid levels within current zoom range
+ *   - Renders coordinate axes (x=0, y=0) with thicker lines
+ *   - Applies zoom-compensated line widths for consistent appearance
+ *   - Returns: void
+ * 
+ * updateZoomInfo() [ENHANCED VERSION]
+ *   - Updates UI with zoom percentage, pixel scale, and current grid resolution
+ *   - Shows finest visible grid level in millimeters
+ *   - Displays actual scale in pixels per centimeter
+ *   - Returns: void
+ * 
+ * GRID LEVEL DETAILS:
+ * - Level 0: 15mm (1.5cm) - Coarse overview grid
+ * - Level 1: 5mm (0.5cm) - Medium detail grid
+ * - Level 2: 1mm - Fine detail grid
+ * - Level 3: 0.2mm - Very fine detail grid
+ * - Level 4: 0.04mm - Ultra-fine detail grid
+ * 
+ * INTEGRATION NOTES:
+ * - Requires zoomLevel, panX, panY, centerX, centerY globals from viewport system
+ * - Call drawGrid(ctx) in your main render loop before drawing geometry
+ * - Grid provides visual reference for precise measurements
+ * - Use mmToPx/pxTomm for converting between design units and screen coordinates
+ * - Grid levels automatically adjust opacity and visibility based on zoom
+ * - Performance optimized by only drawing visible grid lines
+ */
 // Unit conversion constants
 const PIXELS_PER_MM = 100;
 const MM_PER_PIXEL = 1 / PIXELS_PER_MM;

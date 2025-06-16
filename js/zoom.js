@@ -1,3 +1,62 @@
+/**
+ * VIEWPORT CONTROLS SYSTEM
+ * 
+ * This module provides camera controls for a 2D canvas including zoom, pan, and auto-centering
+ * functionality. It handles coordinate transformations between screen and world space and
+ * provides smooth zooming centered on cursor position.
+ * 
+ * GLOBAL STATE:
+ * - zoomLevel: Current zoom multiplier (0.01 minimum, no upper limit)
+ * - panX, panY: Camera offset in screen coordinates
+ * - canvasWidth, canvasHeight: Canvas dimensions for calculations
+ * 
+ * CORE FUNCTIONS:
+ * 
+ * autoCenter()
+ *   - Automatically centers and zooms the view to fit all geometry (ellipses + source line)
+ *   - Calculates optimal zoom with 20% padding, capped at 5x for auto-center
+ *   - Updates pan to center geometry in viewport
+ *   - Returns: void
+ * 
+ * screenToWorld(screenX, screenY)
+ *   - Converts screen/canvas coordinates to world coordinates
+ *   - Accounts for current zoom and pan transformations
+ *   - Returns: object {x, y} in world coordinates
+ * 
+ * zoomAtCursor(cursorX, cursorY, zoomFactor)
+ *   - Zooms in/out while keeping cursor position fixed in world space
+ *   - Prevents zoom levels below 1% to avoid display issues
+ *   - Automatically updates display and zoom info
+ *   - Returns: void
+ * 
+ * updateZoomInfo()
+ *   - Updates UI display with current zoom percentage and pan instructions
+ *   - Returns: void
+ * 
+ * setZoom(newZoom)
+ *   - Sets absolute zoom level with minimum 1% constraint
+ *   - Triggers display update
+ *   - Returns: void
+ * 
+ * handleMouseWheel(event)
+ *   - Mouse wheel event handler for smooth zooming
+ *   - Zooms at cursor position with 10% increments
+ *   - Prevents default scroll behavior
+ *   - Returns: void
+ * 
+ * COORDINATE SYSTEM:
+ * - World coordinates: Actual geometry coordinates (can be negative)
+ * - Screen coordinates: Canvas pixel coordinates (0,0 at top-left)
+ * - Transformations: worldX = (screenX - panX) / zoomLevel
+ * 
+ * INTEGRATION NOTES:
+ * - Requires canvas element and zoomInfo UI element
+ * - Call autoCenter() after geometry changes to reframe view
+ * - Use screenToWorld() for mouse interaction with world objects
+ * - Mouse wheel listener is automatically attached to canvas
+ * - Works with ellipse geometry system (requires getEllipseConstants, computeSourceLine)
+ */
+
 // Auto-center the view on the geometry
 function autoCenter() {
     const { ht, hl, kt, kl, ct, cl, dt, dl } = getEllipseConstants();

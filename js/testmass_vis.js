@@ -1,6 +1,96 @@
-// histogram-rectangle-overlay.js
-// Heat diffusion model with dynamic range scaling
-// Fixed positioning: rectangle appears on surface and extends into material
+/**
+ * HISTOGRAM RECTANGLE OVERLAY SYSTEM
+ * 
+ * This system provides a heat diffusion visualization overlay that displays ray termination
+ * statistics as a color-coded heat map on a rectangular surface. The overlay uses dynamic
+ * range scaling and real-time heat diffusion calculations to visualize impact patterns.
+ * 
+ * CLASS: HistogramRectangleOverlay
+ * 
+ * CONSTRUCTOR:
+ * - HistogramRectangleOverlay(pixelsPerMM = 1)
+ *   Creates overlay instance with unit conversion support
+ * 
+ * CONFIGURATION:
+ * - Rectangle: 200mm × 340mm, positioned with right edge at x=0 (extends into material)
+ * - Heat colors: Blue (cold) → Cyan → Green → Yellow → Red (hot)
+ * - Dynamic range scaling based on accumulated hit statistics
+ * - Configurable diffusion rate, decay rate, transparency, and growth parameters
+ * 
+ * CORE METHODS:
+ * 
+ * render(ctx, stats, zoomLevel, panX, panY)
+ *   - Main rendering function that draws heat diffusion visualization
+ *   - Takes termination statistics and viewport parameters
+ *   - Creates high-resolution heat map using temporary canvas
+ *   - Returns: void
+ * 
+ * updateDynamicRange(stats)
+ *   - Updates heat intensity scaling based on current hit statistics
+ *   - Adjusts maxHeatIntensity and diffusion radius dynamically
+ *   - Enables real-time adaptation to varying hit densities
+ *   - Returns: void
+ * 
+ * calculateHeatDiffusion(worldX, worldY, stats)
+ *   - Calculates heat intensity at specific world coordinates
+ *   - Uses exponential distance-based decay for realistic diffusion
+ *   - Combines contributions from all hit locations
+ *   - Returns: number (heat intensity)
+ * 
+ * getHeatColor(normalizedHeat)
+ *   - Converts normalized heat value [0,1] to RGB color
+ *   - Uses smooth gradient: Blue → Cyan → Green → Yellow → Red
+ *   - Returns: object {r, g, b}
+ * 
+ * getFinalColor(heatIntensity)
+ *   - Blends heat color with base color based on intensity
+ *   - Applies transparency and color mixing
+ *   - Returns: object {r, g, b, a}
+ * 
+ * CONFIGURATION METHODS:
+ * 
+ * setPixelsPerMM(pixelsPerMM) - Updates unit conversion factor
+ * setRectangleDimensions(widthMM, heightMM) - Changes overlay size
+ * updateConfig(newConfig) - Bulk configuration update
+ * setDiffusionRate(rate) - Heat spread factor [0-1]
+ * setHeatDecayRate(rate) - Distance decay factor [0-1] 
+ * setRangeGrowthRate(rate) - Dynamic range growth speed [0.5-20]
+ * setHeatTransparency(transparency) - Heat opacity [0-1]
+ * 
+ * UTILITY METHODS:
+ * 
+ * toggle() - Toggles overlay visibility
+ * enable()/disable() - Controls overlay rendering
+ * resetHeat() - Clears accumulated heat data
+ * getHeatStats() - Returns current heat statistics object
+ * 
+ * GLOBAL INTEGRATION:
+ * 
+ * renderTM(ctx, zoomLevel, panX, panY)
+ *   - Simple integration function for rendering overlay
+ *   - Automatically fetches termination statistics
+ *   - Call this in your main render loop
+ *   - Returns: void
+ * 
+ * KEYBOARD CONTROLS:
+ * - 'T': Toggle overlay visibility
+ * - '+/-': Adjust diffusion rate
+ * - '[/]': Adjust heat decay rate  
+ * - ',/.': Adjust range growth rate
+ * - 'O/P': Adjust heat transparency
+ * - 'R': Reset heat accumulation
+ * - 'H': Show heat statistics in console
+ * 
+ * INTEGRATION NOTES:
+ * - Requires termination statistics from getTerminationStats() function
+ * - Uses binned Y-position data for heat source locations
+ * - Positioned with right edge at x=0, extending left into material
+ * - Heat diffusion radius grows dynamically with accumulated hits
+ * - Global instance available as window.histogramRectangleOverlay
+ * - Compatible with viewport zoom/pan system
+ * - Performance optimized with configurable resolution (80×80 default)
+ */
+
 
 class HistogramRectangleOverlay {
     constructor(pixelsPerMM = 1) {
@@ -12,7 +102,7 @@ class HistogramRectangleOverlay {
         
         // Heat diffusion configuration
         this.config = {
-            baseColor: { r: 120, g: 180, b: 220, a: 0.4 }, // Light blue base (cold) - more visible on dark background
+            baseColor: { r: 120, g: 180, b: 220, a: 0.1 }, // Light blue base (cold) - more visible on dark background
             edgeColor: 'rgba(150, 200, 255, 0.9)',
             edgeWidth: 2,
             maxHeatIntensity: 1.0,    // Will be dynamically adjusted
@@ -309,8 +399,7 @@ class HistogramRectangleOverlay {
 window.histogramRectangleOverlay = new HistogramRectangleOverlay(window.PIXELS_PER_MM || 1);
 
 // Simple integration function
-function renderTM(ctx, zoomLevel, panX, panY) {
-    const stats = typeof getTerminationStats === 'function' ? getTerminationStats() : null;
+function renderTM(ctx, stats, zoomLevel, panX, panY) {
     window.histogramRectangleOverlay.render(ctx, stats, zoomLevel, panX, panY);
 }
 
