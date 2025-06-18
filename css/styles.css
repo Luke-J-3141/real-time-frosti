@@ -101,7 +101,8 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
-/* UCR Physics Logo Background 
+
+/* UCR Physics Logo Background */
 body::before {
     content: '';
     position: fixed;
@@ -110,11 +111,11 @@ body::before {
     transform: translate(58%, -143%);
     width: 30vw;
     height: 50vh;
-    background: url('./assets/images/UCR_banner.png') center/contain no-repeat;
+    background: url('https://www.physics.ucr.edu/sites/default/files/UCRPnA_banner.png') center/contain no-repeat;
     opacity: 0.8;
-    z-index: -1;
+    z-index: 4;
     pointer-events: none;
-}*/
+}
 
 /* Main Container - Mobile First */
 .container {
