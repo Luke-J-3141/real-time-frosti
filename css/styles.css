@@ -272,9 +272,9 @@ canvas:hover {
 .control-section {
     margin-bottom: 20px;
     padding: 16px;
-    background: rgba(30, 58, 95, 0.4);
+    background: rgba(17, 46, 95, 0.4);
     border-radius: 12px;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(87, 147, 244, 0.2);
     position: relative;
     overflow: hidden;
     /* Improved mobile collapsible behavior */
@@ -288,7 +288,7 @@ canvas:hover {
     left: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, #3b82f6, #e6b800, #d4a500);
+    background: linear-gradient(90deg, #3b82f6, #e6b800, #997c12);
 }
 
 .control-section h3 {
@@ -318,7 +318,7 @@ canvas:hover {
     content: '';
     width: 6px;
     height: 6px;
-    background: linear-gradient(135deg, #3b82f6, #e6b800);
+    background: linear-gradient(135deg, #3b82f6, #7f6f2e);
     border-radius: 50%;
 }
 
@@ -329,7 +329,7 @@ canvas:hover {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 12px;
     transform-origin: center;
-    color: #e6b800;
+    color: #8d7515;
 }
 
 .control-section.collapsed h3::after {
@@ -381,7 +381,7 @@ label {
     margin-bottom: 12px;
     font-size: 14px;
     font-weight: 500;
-    color: #cbd5e1;
+    color: #cce1fa;
     /* Mobile: Larger text */
     min-height: 44px;
     /* Prevent text selection flash */
@@ -394,11 +394,11 @@ label {
 .value {
     font-size: 13px;
     font-weight: 600;
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.15);
+    color: #619cfb;
+    background: rgba(1, 13, 33, 0.15);
     padding: 4px 10px;
     border-radius: 6px;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    border: 1px solid rgba(3, 87, 222, 0.3);
     min-width: 50px;
     text-align: center;
 }
@@ -408,7 +408,7 @@ input[type="range"] {
     width: 100%;
     height: 12px;
     border-radius: 6px;
-    background: linear-gradient(90deg, #0f1a2e, #1e3a5f);
+    background: linear-gradient(90deg, #121c30, #324c84);
     outline: none;
     margin-bottom: 16px;
     appearance: none;
@@ -427,13 +427,14 @@ input[type="range"]::-webkit-slider-thumb {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #d4a500);
+    background: linear-gradient(135deg, #0649b3, #eeab37);
     cursor: pointer;
-    border: 3px solid #ffffff;
+    border: 2px solid #000000;
     box-shadow: 
-        0 4px 12px rgba(59, 130, 246, 0.4),
-        0 0 0 4px rgba(59, 130, 246, 0.1);
+        0 4px 12px rgba(2, 20, 48, 0.308),
+        0 0 0 4px rgba(15, 82, 190, 0.1);
     transition: all 0.2s ease;
+
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
@@ -447,9 +448,9 @@ input[type="range"]::-moz-range-thumb {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #d4a500);
+    background: linear-gradient(135deg, #0649b3, #eeab37);
     cursor: pointer;
-    border: 3px solid #ffffff;
+    border: 3px solid #000000;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     -moz-appearance: none;
 }
@@ -463,7 +464,7 @@ input[type="range"]::-moz-range-track {
 
 /* Enhanced Buttons - Mobile Friendly */
 button {
-    background: linear-gradient(135deg, #3b82f6, #ffd9007c);
+    background: linear-gradient(135deg, #3b82f6, #ab7802);
     color: rgb(255, 255, 255);
     border: none;
     padding: 16px 24px;
@@ -504,6 +505,73 @@ button:active {
     transform: translateY(-1px);
 }
 
+/* Toggle Button States */
+button.toggle-on {
+    background: linear-gradient(135deg, #3b82f6, #ab7802);
+    box-shadow: 
+        0 4px 12px rgba(16, 185, 129, 0.4),
+        inset 0 1px 0 rgba(110, 231, 183, 0.3);
+    border: 2px solid rgba(16, 185, 129, 0.3);
+}
+
+button.toggle-on:hover {
+    background: linear-gradient(135deg, #407af8, #f5d6257c);
+    box-shadow: 
+        0 8px 20px rgba(16, 185, 129, 0.5),
+        inset 0 1px 0 rgba(110, 231, 183, 0.4);
+    transform: translateY(-2px);
+}
+
+button.toggle-off {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    box-shadow: 
+        0 4px 12px rgba(107, 114, 128, 0.3),
+        inset 0 1px 0 rgba(156, 163, 175, 0.2);
+    border: 2px solid rgba(107, 114, 128, 0.2);
+}
+
+button.toggle-off:hover {
+    background: linear-gradient(135deg, #4b5563, #374151);
+    box-shadow: 
+        0 8px 20px rgba(107, 114, 128, 0.4),
+        inset 0 1px 0 rgba(156, 163, 175, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Alternative toggle styles - more vibrant */
+button.toggle-on.vibrant {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 
+        0 4px 12px rgba(245, 158, 11, 0.4),
+        inset 0 1px 0 rgba(252, 211, 77, 0.3);
+    border: 2px solid rgba(245, 158, 11, 0.3);
+}
+
+button.toggle-on.vibrant:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    box-shadow: 
+        0 8px 20px rgba(245, 158, 11, 0.5),
+        inset 0 1px 0 rgba(252, 211, 77, 0.4);
+}
+
+/* Pulse animation for active toggles */
+button.toggle-on.pulse {
+    animation: togglePulse 1s infinite;
+}
+
+@keyframes togglePulse {
+    0%, 100% {
+        box-shadow: 
+            0 4px 12px rgba(16, 185, 129, 0.4),
+            inset 0 1px 0 rgba(110, 231, 183, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 6px 16px rgba(16, 185, 129, 0.6),
+            inset 0 1px 0 rgba(110, 231, 183, 0.4);
+    }
+}
+
 .button-group {
     margin-bottom: 24px;
     display: flex;
@@ -522,7 +590,6 @@ button:active {
         width: 100%;
     }
 }
-
 /* Zoom Controls - Mobile Friendly */
 .zoom-controls {
     position: absolute;

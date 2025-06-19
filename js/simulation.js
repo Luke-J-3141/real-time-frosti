@@ -84,25 +84,23 @@ function updateSimulation() {
     // Update existing rays
     rays.forEach(ray => {
         if (!ray.active) return;
-        
         ray.step(raySpeed);
         const normal = checkEllipseIntersection(ray);
         
         if (normal) {
             ray.reflect(normal);
         }
+
+        // Disable rays if they are in impossible positions i.e. have clipped through the ellipse
         deleteRays(ray);
     });
 
     // Remove inactive rays
     rays = rays.filter(ray => ray.active);
-    
     frameCount++;
-    
 }
 
-
-//simulation
+// Main animation loop 
 function animate() {
     if (!isRunning) return;
     perfMonitor.frameStart();
@@ -116,11 +114,5 @@ function animate() {
     perfMonitor.renderEnd();
     perfMonitor.frameEnd();
     perfMonitor.updateRayCount(rays.length, rays.totalraysCreated);
-
-    // Termination diagnostics
-    // console.log(getTerminationDiagnostics())
-
-    // Histogram diagnostics
-    //console.log(getHistogramDiagnostics());
     animationId = requestAnimationFrame(animate);
 }   

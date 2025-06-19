@@ -143,8 +143,6 @@
 // <====== Comments ======>
 // TODO:
 
-const R_tm = 170 * PIXELS_PER_MM; // Termination radius
-
 // Control elements
 const controls = {
     sourceLength: document.getElementById('sourceLength'),
@@ -207,9 +205,9 @@ function updateValues() {
     voffset = verticalOffset;
 }
 
-// Event listeners
+// Button Event listeners
+// ================================================================================
 document.getElementById('startBtn').addEventListener('click', () => {
-    
     if (isRunning) {
         isRunning = false;
         if (animationId) cancelAnimationFrame(animationId);
@@ -235,31 +233,240 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     redraw();
 });
 
+// Clear rays with out stopping simulation
 document.getElementById('clearRay').addEventListener('click', () => {
     console.log('Rays cleared');
     rays = [];
     redraw();
 });
 
+
+// Overlay buttons for resetting and toggling
+// ================================================================================
 document.getElementById('resetOverlays').addEventListener('click', () => {
-    console.log('All overlays reset');
+    console.log('All overlays reset with button');
     resetHistogram();
     resetKDE();
+    const overlay = window.histogramRectangleOverlay;
+    if (overlay) {
+        overlay.clear();
+    }
     redraw();
 });
 
-document.getElementById('toggleKDE').addEventListener('click', () => {
+// Constraints toggle
+document.getElementById('toggleConstraints').onclick = () => {
+    const btn = document.getElementById('toggleConstraints');
+    const isOn = btn.classList.contains('toggle-on');
+    
+    if (isOn) {
+        btn.classList.remove('toggle-on');
+        btn.classList.add('toggle-off');
+        btn.textContent = 'Constraints: OFF';
+        // Disable both constraints
+        enableProximityConstraint = true;
+        enableApertureConstraint = true;
+    } else {
+        btn.classList.remove('toggle-off');
+        btn.classList.add('toggle-on');
+        btn.textContent = 'Constraints: ON';
+        // Enable both constraints
+        enableProximityConstraint = false;
+        enableApertureConstraint = false;
+    }
+    console.log('Constraints toggled:', enableProximityConstraint ? 'ON' : 'OFF');
+    redraw();
+};
+
+// KDE toggle button
+document.getElementById('toggleKDE').onclick = () => {
+    const btn = document.getElementById('toggleKDE');
+    toggleButtonState(btn, 'KDE');
     toggleKDE();
-});
+    redraw();
+};
 
-document.getElementById('toggleHistogram').addEventListener('click', () => {
+// Histogram toggle button
+document.getElementById('toggleHistogram').onclick = () => {
+    const btn = document.getElementById('toggleHistogram');
+    toggleButtonState(btn, 'Histogram');
     toggleHistogram();
+    redraw();
+};
+
+// Thermal overlay toggle button
+document.getElementById('toggleThermalOverlay').onclick = () => {
+    const btn = document.getElementById('toggleThermalOverlay');
+    toggleButtonState(btn, 'Thermal');
+    const overlay = window.thermalOverlay;
+    overlay.toggle();
+    console.log('Heat diffusion overlay:', overlay.config.visible ? 'ON' : 'OFF');
+    redraw();
+};
+
+// Helper function for standard toggle behavior
+function toggleButtonState(button, label) {
+    const isOn = button.classList.contains('toggle-on');
+    
+    if (isOn) {
+        button.classList.remove('toggle-on');
+        button.classList.add('toggle-off');
+        button.textContent = `${label}: OFF`;
+    } else {
+        button.classList.remove('toggle-off');
+        button.classList.add('toggle-on');
+        button.textContent = `${label}: ON`;
+    }
+}
+
+// Hotkey control event listener
+// ================================================================================
+document.addEventListener('keydown', (e) => {
+
+    // reset all overlays with 'r' key
+    if (e.key === 'r' || e.key === 'R') {
+        resetHistogram();
+        resetKDE();
+        const overlay = window.thermalOverlay;
+        if (overlay) {
+            overlay.clear();
+        }
+        console.log('All overlays reset with hotkey');
+        redraw();
+    }
+
+    // toggle constraints with 'c' key
+    if (e.key === 'c' || e.key === 'C'){
+        const btn = document.getElementById('toggleConstraints');
+        const isOn = btn.classList.contains('toggle-on');
+        
+        if (isOn) {
+            btn.classList.remove('toggle-on');
+            btn.classList.add('toggle-off');
+            btn.textContent = 'Constraints: OFF';
+            // Disable both constraints
+            enableProximityConstraint = true;
+            enableApertureConstraint = true;
+        } else {
+            btn.classList.remove('toggle-off');
+            btn.classList.add('toggle-on');
+            btn.textContent = 'Constraints: ON';
+            // Enable both constraints
+            enableProximityConstraint = false;
+            enableApertureConstraint = false;
+        }
+        console.log('Constraints toggled:', enableProximityConstraint ? 'ON' : 'OFF');
+        redraw();
+    };
+
+    // toggle histogram with 'h' key
+    if (e.key === 'h' || e.key === 'H') {
+        const btn = document.getElementById('toggleHistogram');
+        toggleButtonState(btn, 'Histogram');
+        toggleHistogram();
+        redraw();
+    } 
+
+    // toggle KDE with 'k' key
+    if (e.key === 'k' || e.key === 'K') {
+        const btn = document.getElementById('toggleKDE');
+        toggleButtonState(btn, 'KDE');
+        toggleKDE();
+    } 
+    
+    if (e.key === 'b' || e.key === 'B') {
+        // Cycle through different kernels types
+        const kernels = Object.keys(KERNEL_FUNCTIONS);
+        const currentIndex = kernels.indexOf(KDE_CONFIG.kernelType);
+        const nextIndex = (currentIndex + 1) % kernels.length;
+        KDE_CONFIG.kernelType = kernels[nextIndex];
+        currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
+        console.log('KDE kernel changed to:', KDE_CONFIG.kernelType);
+    } 
+    
+    if (e.key === 'n' || e.key === 'N') {
+        // Adjust bandwidth
+        const currentBandwidth = currentKDEParams ? currentKDEParams.bandwidth : 1;
+        KDE_CONFIG.bandwidth = currentBandwidth * 1.2; // Increase by 20%
+        currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
+        console.log('KDE bandwidth increased to:', KDE_CONFIG.bandwidth.toFixed(3));
+    } 
+    
+    if (e.key === 'm' || e.key === 'M') {
+        // Decrease bandwidth
+        const currentBandwidth = currentKDEParams ? currentKDEParams.bandwidth : 1;
+        KDE_CONFIG.bandwidth = currentBandwidth * 0.8; // Decrease by 20%
+        currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
+        console.log('KDE bandwidth decreased to:', KDE_CONFIG.bandwidth.toFixed(3));
+    }
+
+    // Thermal overlay control hotkeys
+    const overlay = window.thermalOverlay;
+    
+    // Toggle thermal overlay with 't' key
+    if (e.key === 't' || e.key === 'T') {
+        overlay.toggle();
+        const btn = document.getElementById('toggleThermalOverlay');
+        toggleButtonState(btn, 'Thermal');
+        console.log('Heat diffusion overlay:', overlay.config.visible ? 'ON' : 'OFF');
+        redraw();
+    }
+    
+    // Adjust diffusion rate
+    if (e.key === '-' || e.key === '_') {
+        const currentRate = overlay.config.diffusionRate;
+        overlay.setDiffusionRate(currentRate - 0.1);
+        console.log('Diffusion rate:', overlay.config.diffusionRate.toFixed(2));
+    }
+    
+    if (e.key === '=' || e.key === '+') {
+        const currentRate = overlay.config.diffusionRate;
+        overlay.setDiffusionRate(currentRate + 0.1);
+        console.log('Diffusion rate:', overlay.config.diffusionRate.toFixed(2));
+    }
+    
+    // Adjust heat decay rate
+    if (e.key === '[') {
+        const currentDecay = overlay.config.heatDecayRate;
+        overlay.setHeatDecayRate(currentDecay - 0.05);
+        console.log('Heat decay rate:', overlay.config.heatDecayRate.toFixed(2));
+    }
+    
+    if (e.key === ']') {
+        const currentDecay = overlay.config.heatDecayRate;
+        overlay.setHeatDecayRate(currentDecay + 0.05);
+        console.log('Heat decay rate:', overlay.config.heatDecayRate.toFixed(2));
+    }
+    
+    // Adjust range growth rate (much wider range for real-time visibility)
+    if (e.key === ',') {
+        const currentGrowth = overlay.config.rangeGrowthRate;
+        overlay.setRangeGrowthRate(currentGrowth - 1.0); // Larger steps
+        console.log('Range growth rate:', overlay.config.rangeGrowthRate.toFixed(1));
+    }
+    
+    if (e.key === '.') {
+        const currentGrowth = overlay.config.rangeGrowthRate;
+        overlay.setRangeGrowthRate(currentGrowth + 1.0); // Larger steps
+        console.log('Range growth rate:', overlay.config.rangeGrowthRate.toFixed(1));
+    }
+    
+    // Adjust heat transparency
+    if (e.key === 'o') {
+        const currentTransparency = overlay.config.heatTransparency;
+        overlay.setHeatTransparency(currentTransparency - 0.1);
+        console.log('Heat transparency:', overlay.config.heatTransparency.toFixed(2));
+    }
+    
+    if (e.key === 'p') {
+        const currentTransparency = overlay.config.heatTransparency;
+        overlay.setHeatTransparency(currentTransparency + 0.1);
+        console.log('Heat transparency:', overlay.config.heatTransparency.toFixed(2));
+    }
+
+    
 });
 
-document.getElementById('toggleThermalOverlay').addEventListener('click', () => {
-    const overlay = window.histogramRectangleOverlay;
-    overlay.toggle();
-});
 
 
 // Zoom controls
@@ -308,7 +515,6 @@ canvas.addEventListener('mouseup', () => {
 canvas.addEventListener('mouseleave', () => {
     isDragging = false;
 });
-
 
 
 // Touch controls for mobile
@@ -367,4 +573,3 @@ canvas.addEventListener('touchend', (e) => {
     isDragging = false;
     lastTouchDistance = 0;
 });
-

@@ -221,73 +221,8 @@ function resetHistogram() {
     totalHistogramRenderTime = 0;
 }
 
-// Comprehensive histogram diagnostics function
-function getHistogramDiagnostics() {
-    const stats = getTerminationStats();
-    const avgRenderTime = histogramRenderCount > 0 ? (totalHistogramRenderTime / histogramRenderCount) : 0;
-    const dataPoints = stats ? stats.distribution.size : 0;
-    
-    // Generate warnings and recommendations
-    const warnings = [];
-    const recommendations = [];
-    
-    if (avgRenderTime > 2.0) warnings.push('Slow histogram rendering: ' + avgRenderTime.toFixed(3) + 'ms per frame');
-    if (dataPoints > 500) warnings.push('High histogram complexity: ' + dataPoints + ' bars to render');
-    if (histogramVisible && dataPoints === 0) warnings.push('Histogram visible but no data to display');
-    
-    if (avgRenderTime > 2.0) recommendations.push('Consider reducing histogram detail or optimizing rendering');
-    if (dataPoints > 500) recommendations.push('Increase bin size to reduce number of bars');
-    if (histogramRenderCount > 1000 && avgRenderTime > 1.0) recommendations.push('Consider limiting histogram update frequency');
-    
-    // Calculate health score
-    let healthScore = 100;
-    if (avgRenderTime > 2.0) healthScore -= 40;
-    if (dataPoints > 500) healthScore -= 20;
-    if (avgRenderTime > 5.0) healthScore -= 30;
-    healthScore = Math.max(0, healthScore);
-    
-    return {
-        // Rendering performance
-        totalRenders: histogramRenderCount,
-        totalRenderTimeMs: totalHistogramRenderTime.toFixed(2),
-        avgRenderTimeMs: avgRenderTime.toFixed(4),
-        
-        // Data metrics
-        barsToRender: dataPoints,
-        histogramVisible: histogramVisible,
-        totalDataPoints: stats ? stats.totalTerminations : 0,
-        
-        // Canvas metrics
-        estimatedPixelsPerFrame: dataPoints * HISTOGRAM_CONFIG.barWidth * HISTOGRAM_CONFIG.maxBarLength,
-        configComplexity: Object.keys(HISTOGRAM_CONFIG).length,
-        
-        // Health indicators
-        healthScore: healthScore,
-        warnings: warnings,
-        recommendations: recommendations,
-        
-        // Quick diagnosis
-        status: healthScore > 80 ? 'HEALTHY' : 
-                healthScore > 50 ? 'DEGRADED' : 'CRITICAL',
-        
-        // Performance impact
-        renderingImpact: avgRenderTime > 1.0 ? 'HIGH' : 
-                        avgRenderTime > 0.5 ? 'MEDIUM' : 'LOW'
-    };
-}
-
 // Adjust histogram configuration
 function setHistogramConfig(config) {
     Object.assign(HISTOGRAM_CONFIG, config);
 }
 
-// Optional: Add keyboard controls
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'h' || e.key === 'H') {
-        toggleHistogram();
-    } else if (e.key === 'r' || e.key === 'R') {
-        resetHistogram();
-        resetKDE();
-        console.log('Histogram and KDE data reset');
-    }
-});

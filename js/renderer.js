@@ -80,7 +80,7 @@ function worldToScreen(worldX, worldY) {
 }
 
 function drawReflectors() {
-    const { ht, hl, kt, kl, ct, cl, dt, dl, phit, phil} = getEllipseConstants();
+    const { ht, hl, kt, kl, ct, cl, dt, dl, phit, phil } = getEllipseConstants();
 
     ctx.strokeStyle = '#FFD700'; // Gold color
     ctx.lineWidth = Math.min(2, Math.max(1, 2 / zoomLevel)); // Dynamic width with upper limit of 3
@@ -89,12 +89,10 @@ function drawReflectors() {
     const upperMask = getEllipseMaskLine("upper");
     const lowerMask = getEllipseMaskLine("lower");
     
-    // Get source plane position (you'll need to get this from your source configuration)
-
     function drawMaskedEllipse(h, k, a, b, phi, maskLine, drawBelow = true) {
         ctx.beginPath();
         
-        const steps = 200;
+        const steps = 5000;
         let firstPoint = true;
         
         for (let i = 0; i <= steps; i++) {
@@ -110,8 +108,13 @@ function drawReflectors() {
             // Additional check: only draw if point is to the left of source plane
             const shouldDrawSourcePlane = isLeftOfSourcePlane(x, y);
             
-            // Point must satisfy both conditions
-            const shouldDraw = shouldDrawMask && shouldDrawSourcePlane;
+            // Constraint checks (only apply if enabled)
+            const proximityLimits = isaboveProximity();
+            const shouldDrawProximity = enableProximityConstraint || x >= proximityLimits.x;
+            const shouldDrawAperture =   enableApertureConstraint || y >= proximityLimits.y;
+            
+            // Point must satisfy all conditions
+            const shouldDraw = shouldDrawMask && shouldDrawSourcePlane && shouldDrawProximity && shouldDrawAperture;
 
             if (shouldDraw) {
                 const screen = worldToScreen(x, y);
@@ -131,7 +134,7 @@ function drawReflectors() {
                 }
             }
         }
-        
+
         // Complete any remaining path
         if (!firstPoint) {
             ctx.stroke();
@@ -180,7 +183,6 @@ function drawRays() {
     ctx.globalAlpha = 1;
 }
 
-
 function drawSource() {
     const { x1, y1, x2, y2 } = computeSourceLine();
 
@@ -197,7 +199,7 @@ function drawSource() {
 
 }
 
-
+// Draw diagonal lines without constraints
 function drawDiagonalLines_UC() {
     const { slopet, slopel, interseptt, interseptl } = getEllipseConstants();
     
@@ -229,7 +231,123 @@ function drawDiagonalLines_UC() {
     ctx.setLineDash([]);
 }
 
+// Draw diagonal lines with constraints
+function drawDiagonalLines_C() {
+    const { x1, y1, x2, y2 } = computeSourceLine();
+    const { ht, hl, kt, kl, ct, cl, dt, dl, phit, phil } = getEllipseConstants();
+    
+    ctx.strokeStyle = '#FF1493'; // Deep pink color to distinguish from other lines
+    ctx.lineWidth = Math.min(2, Math.max(1, 1 / zoomLevel));
+    ctx.setLineDash([3, 3]); // Shorter dash pattern
+    
+    // Function to find the endpoint of the drawn reflector (furthest from source plane)
+    function findLastReflectorPoint(h, k, a, b, phi, maskLine, drawBelow = true) {
+        const steps = 5000;
+        const validPoints = [];
+        
+        // First, collect all valid points that would be drawn
+        for (let i = 0; i <= steps; i++) {
+            const t = (i / steps) * 2 * Math.PI;
+            const x = h + a * Math.cos(t) * Math.cos(phi) - b * Math.sin(t) * Math.sin(phi);
+            const y = k + a * Math.cos(t) * Math.sin(phi) + b * Math.sin(t) * Math.cos(phi);
+            
+            // Apply the same constraints as in drawReflectors()
+            const shouldDrawMask = drawBelow ? 
+                isPointAboveMaskLine(x, y, maskLine) : 
+                !isPointAboveMaskLine(x, y, maskLine);
+            
+            const shouldDrawSourcePlane = isLeftOfSourcePlane(x, y);
+            
+            const proximityLimits = isaboveProximity();
+            const shouldDrawProximity = enableProximityConstraint || x >= proximityLimits.x;
+            const shouldDrawAperture = enableApertureConstraint || y >= proximityLimits.y;
+            
+            const shouldDraw = shouldDrawMask && shouldDrawSourcePlane && shouldDrawProximity && shouldDrawAperture;
+            
+            if (shouldDraw) {
+                validPoints.push({ x, y, t });
+            }
+        }
+        
+        if (validPoints.length === 0) return null;
+        
+        // Get source plane position for distance calculation
+        const { x1, y1, x2, y2 } = computeSourceLine();
+        const sourceCenterX = (x1 + x2) / 2;
+        const sourceCenterY = (y1 + y2) / 2;
+        
+        // Find the point with maximum distance from source plane center
+        let maxDistance = -1;
+        let farthestPoint = null;
+        
+        validPoints.forEach(point => {
+            const distance = Math.sqrt(
+                (point.x - sourceCenterX) ** 2 + 
+                (point.y - sourceCenterY) ** 2
+            );
+            
+            if (distance > maxDistance) {
+                maxDistance = distance;
+                farthestPoint = point;
+            }
+        });
+        
+        return farthestPoint;
+    }
+    
+    // Get mask lines
+    const upperMask = getEllipseMaskLine("upper");
+    const lowerMask = getEllipseMaskLine("lower");
+    
+    // Find the last drawn points of both reflectors
+    const upperLastPoint = findLastReflectorPoint(ht, kt, ct, dt, phit, upperMask, true);
+    const lowerLastPoint = findLastReflectorPoint(hl, kl, cl, dl, phil, lowerMask, false);
+    
+    // Draw diagonal lines from source plane edges to x=0, passing through reflector end points
+    function drawDiagonalLine(sourcePoint, reflectorPoint) {
+        if (!reflectorPoint) return;
+        
+        // Calculate the line equation from source point through reflector point
+        const dx = reflectorPoint.x - sourcePoint.x;
+        const dy = reflectorPoint.y - sourcePoint.y;
+        
+        // Find intersection with x=0 line
+        if (Math.abs(dx) > 1e-10) { // Avoid division by zero
+            const t = -sourcePoint.x / dx; // Parameter when x = 0
+            const intersectionY = sourcePoint.y + t * dy;
+            
+            // Draw line from source point to x=0 intersection
+            const screenSource = worldToScreen(sourcePoint.x, sourcePoint.y);
+            const screenIntersection = worldToScreen(0, intersectionY);
+            
+            ctx.beginPath();
+            ctx.moveTo(screenSource.x, screenSource.y);
+            ctx.lineTo(screenIntersection.x, screenIntersection.y);
+            ctx.stroke();
+        }
+    }
+    
+    // Draw diagonal lines: upper edge to lower reflector, lower edge to upper reflector
+    // Determine which source point is upper and which is lower
+    const upperSourcePoint = y1 > y2 ? { x: x1, y: y1 } : { x: x2, y: y2 };
+    const lowerSourcePoint = y1 > y2 ? { x: x2, y: y2 } : { x: x1, y: y1 };
+    
+    // Draw from upper source edge to lower reflector endpoint
+    if (lowerLastPoint) {
+        drawDiagonalLine(upperSourcePoint, lowerLastPoint);
+    }
+    
+    // Draw from lower source edge to upper reflector endpoint
+    if (upperLastPoint) {
+        drawDiagonalLine(lowerSourcePoint, upperLastPoint);
+    }
+    
+    // Reset line dash
+    ctx.setLineDash([]);
+}
 
+// Draw mirrored elements below the horizontal centerline
+// Currenly this function is unable to draw the KDE distribution
 function drawMirroredElements(stats) {
     // Save the current canvas state
     ctx.save();
@@ -244,7 +362,12 @@ function drawMirroredElements(stats) {
     drawReflectors();
     drawRays();
     drawSource();
-    drawDiagonalLines_UC();
+    if (enableApertureConstraint || enableProximityConstraint) {
+        drawDiagonalLines_UC();
+    }
+    if (!enableApertureConstraint || !enableProximityConstraint) {
+        drawDiagonalLines_C();
+    }
 
     const inverseStats = {
         ...stats,
@@ -262,7 +385,7 @@ function drawMirroredElements(stats) {
     ctx.restore();
 }
 
-// Full drawing function
+// Main drawing function called by the animation loop and after any state changes
 function redraw() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);  
     ctx.save();
@@ -271,8 +394,13 @@ function redraw() {
     drawReflectors();
     drawRays();
     drawSource();
-    drawDiagonalLines_UC();    
-
+    if (enableApertureConstraint || enableProximityConstraint) {
+        drawDiagonalLines_UC();
+    }
+    if (!enableApertureConstraint || !enableProximityConstraint) {
+        drawDiagonalLines_C();
+    }
+    
     // Get stats from your physics module
     const stats = getTerminationStats();
     
@@ -283,6 +411,5 @@ function redraw() {
 
     drawMirroredElements(stats);
     ctx.restore();
-
 }
 

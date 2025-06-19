@@ -84,7 +84,7 @@ PHYSICAL ACCURACY:
 // TODO:
 
 class Ray {
-    constructor(x, y, angle) {
+    constructor(x, y, angle, power = 1.0) {
         this.startX = x;
         this.startY = y;
         this.x = x;
@@ -98,6 +98,22 @@ class Ray {
         this.age = 0;
         this.maxAge = rayLifetime;
         this.totalraysCreated = 0;
+        this.power = power;
+        this.intensity = power; // Can be modified by absorption, reflection, etc.
+        // Pre-calculate direction for performance
+        this.dx = Math.cos(angle);
+        this.dy = Math.sin(angle);
+    }
+    // Update position along ray path
+    propagate(distance) {
+      this.x += this.dx * distance;
+      this.y += this.dy * distance;
+    }
+    
+    // Attenuate power (for absorption, scattering, etc.)
+    attenuate(factor) {
+      this.intensity *= factor;
+      return this.intensity > 0.001; // Return false if ray is too weak
     }
     
     step(speed) {
@@ -174,43 +190,48 @@ function emitNewRays() {
   const dx = x2 - x1;
   const dy = y2 - y1;
   const length = Math.hypot(dx, dy);
-  const nx = -dy / length;  // Normal vector
+  const nx = -dy / length;  // Normal vector (outward)
   const ny = dx / length;
   
-  // Center point of the source line
-  const centerX = (x1 + x2) / 2;
-  const centerY = (y1 + y2) / 2;
-
   for (let i = 0; i < emissionRate; i++) {
-      const t = Math.random();
-      const x = x1 + t * (x2 - x1);
-      const y = y1 + t * (y2 - y1);
+    // Random position along the surface using uniform distribution
+    const t = Math.random();
+    const x = x1 + t * dx;
+    const y = y1 + t * dy;
 
-      const baseAngle = Math.atan2(ny, nx);
-      const maxSpread = 2.5;
-      const edgeThreshold = 0.1; // Consider rays within 10% of edges as "edge rays"
-      
-      let angle;
-      if (t < edgeThreshold || t > (1 - edgeThreshold)) {
-          // Edge rays: angle ranges from straight (normal) to pointing toward center
-          const directionToCenter = Math.atan2(centerY - y, centerX - x);
-          
-          // Randomly interpolate between normal direction and center direction
-          const mixFactor = Math.random(); // 0 = straight, 1 = toward center
-          
-          // Use spherical linear interpolation for smooth angle blending
-          let angleDiff = directionToCenter - baseAngle;
-          // Normalize angle difference to [-π, π]
-          while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-          while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
-          
-          angle = baseAngle + mixFactor * angleDiff;
-      } else {
-          // Interior rays: use full spread as before
-          angle = baseAngle + (Math.random() - 0.5) * maxSpread;
-      }
-      rays.push(new Ray(x, y, angle));
-
+    // Calculate emission angle using Lambert's cosine law
+    // This gives realistic angular distribution of power from surfaces
+    const baseAngle = Math.atan2(ny, nx);
+    
+    // Generate cosine-weighted random angle (Lambert's law)
+    // Sample uniformly in solid angle, then project to hemisphere
+    const u1 = Math.random();
+    const u2 = Math.random();
+    
+    // Convert to polar coordinates on hemisphere
+    const cosTheta = Math.sqrt(u1); // Cosine weighting
+    const phi = 2 * Math.PI * u2;   // Uniform azimuthal angle
+    
+    // Convert to Cartesian (theta from normal, phi around normal)
+    const sinTheta = Math.sqrt(1 - cosTheta * cosTheta);
+    
+    // Maximum emission angle (90° = full hemisphere, smaller for more focused)
+    const maxEmissionAngle = Math.PI / 2; // Full hemisphere
+    const theta = Math.acos(cosTheta) * (maxEmissionAngle / (Math.PI / 2));
+    
+    // Random rotation around the normal
+    const azimuth = phi;
+    
+    // Convert spherical coordinates to 2D emission angle
+    // Project 3D direction onto 2D plane
+    const emissionAngle = baseAngle + (Math.random() - 0.5) * 2 * theta * Math.cos(azimuth);
+    
+    // Create ray with power proportional to cosine of angle from normal
+    const angleFromNormal = Math.abs(emissionAngle - baseAngle);
+    const powerWeight = Math.cos(angleFromNormal); // Lambert's law
+    
+    const ray = new Ray(x, y, emissionAngle);
+    ray.power = powerWeight; // Store relative power for rendering/physics
+    rays.push(ray);
   }
 }
-

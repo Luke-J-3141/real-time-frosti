@@ -47,6 +47,8 @@
  */
 
 // Termination line parameters
+
+const R_tm = 170 * PIXELS_PER_MM; // radius of test mass in pixels
 let terminationBounds = R_tm; // bounds of TM in y-direction
 const terminationX = 0; // x-coordinate of the termination line
 

@@ -92,7 +92,7 @@
  */
 
 
-class HistogramRectangleOverlay {
+class ThermalOverlay {
     constructor(pixelsPerMM = 1) {
         this.PIXELS_PER_MM = pixelsPerMM;
         
@@ -373,7 +373,6 @@ class HistogramRectangleOverlay {
     
     toggle() {
         this.config.visible = !this.config.visible;
-        console.log('Overlay visibility:', this.config.visible ? 'ON' : 'OFF');
     }
     
     enable() {
@@ -393,91 +392,22 @@ class HistogramRectangleOverlay {
             currentDiffusionRadius: this.config.localRadius
         };
     }
+
+    clear() {
+        this.resetHeat();
+        this.config.visible = true; // Reset visibility to default
+    }
 }
 
 // Create global instance
-window.histogramRectangleOverlay = new HistogramRectangleOverlay(window.PIXELS_PER_MM || 1);
+window.thermalOverlay = new ThermalOverlay(window.PIXELS_PER_MM || 1);
 
 // Simple integration function
 function renderTM(ctx, stats, zoomLevel, panX, panY) {
-    window.histogramRectangleOverlay.render(ctx, stats, zoomLevel, panX, panY);
+    window.thermalOverlay.render(ctx, stats, zoomLevel, panX, panY);
 }
-
-// Enhanced keyboard controls
-document.addEventListener('keydown', (e) => {
-    const overlay = window.histogramRectangleOverlay;
-    
-    if (e.key === 't' || e.key === 'T') {
-        overlay.toggle();
-        console.log('Heat diffusion overlay:', overlay.config.visible ? 'ON' : 'OFF');
-    }
-    
-    // Adjust diffusion rate
-    if (e.key === '-' || e.key === '_') {
-        const currentRate = overlay.config.diffusionRate;
-        overlay.setDiffusionRate(currentRate - 0.1);
-        console.log('Diffusion rate:', overlay.config.diffusionRate.toFixed(2));
-    }
-    
-    if (e.key === '=' || e.key === '+') {
-        const currentRate = overlay.config.diffusionRate;
-        overlay.setDiffusionRate(currentRate + 0.1);
-        console.log('Diffusion rate:', overlay.config.diffusionRate.toFixed(2));
-    }
-    
-    // Adjust heat decay rate
-    if (e.key === '[') {
-        const currentDecay = overlay.config.heatDecayRate;
-        overlay.setHeatDecayRate(currentDecay - 0.05);
-        console.log('Heat decay rate:', overlay.config.heatDecayRate.toFixed(2));
-    }
-    
-    if (e.key === ']') {
-        const currentDecay = overlay.config.heatDecayRate;
-        overlay.setHeatDecayRate(currentDecay + 0.05);
-        console.log('Heat decay rate:', overlay.config.heatDecayRate.toFixed(2));
-    }
-    
-    // Adjust range growth rate (much wider range for real-time visibility)
-    if (e.key === ',') {
-        const currentGrowth = overlay.config.rangeGrowthRate;
-        overlay.setRangeGrowthRate(currentGrowth - 1.0); // Larger steps
-        console.log('Range growth rate:', overlay.config.rangeGrowthRate.toFixed(1));
-    }
-    
-    if (e.key === '.') {
-        const currentGrowth = overlay.config.rangeGrowthRate;
-        overlay.setRangeGrowthRate(currentGrowth + 1.0); // Larger steps
-        console.log('Range growth rate:', overlay.config.rangeGrowthRate.toFixed(1));
-    }
-    
-    // Adjust heat transparency
-    if (e.key === 'o') {
-        const currentTransparency = overlay.config.heatTransparency;
-        overlay.setHeatTransparency(currentTransparency - 0.1);
-        console.log('Heat transparency:', overlay.config.heatTransparency.toFixed(2));
-    }
-    
-    if (e.key === 'p') {
-        const currentTransparency = overlay.config.heatTransparency;
-        overlay.setHeatTransparency(currentTransparency + 0.1);
-        console.log('Heat transparency:', overlay.config.heatTransparency.toFixed(2));
-    }
-    
-    // Reset heat accumulation
-    if (e.key === 'r' || e.key === 'R') {
-        overlay.resetHeat();
-        console.log('Heat accumulation reset');
-    }
-    
-    // Show current heat statistics
-    if (e.key === 'h' || e.key === 'H') {
-        const stats = overlay.getHeatStats();
-        console.log('Heat Stats:', stats);
-    }
-});
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = HistogramRectangleOverlay;
+    module.exports = ThermalOverlay;
 }

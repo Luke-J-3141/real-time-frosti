@@ -124,6 +124,7 @@ PERFORMANCE IMPACT:
 
 
 // performance.js - Performance monitoring for FROSTI Ray Tracing
+// Currently disabled remove false && from event listener to enable
 class PerformanceMonitor {
     constructor() {
         this.enabled = false;
@@ -178,7 +179,7 @@ class PerformanceMonitor {
     
     bindHotkeys() {
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'p' || e.key === 'P') {
+            if (false && e.key === 'p' || e.key === 'P') {
                 this.toggle();
             }
         });

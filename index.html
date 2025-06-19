@@ -104,30 +104,30 @@ Perfect for educational physics simulations, optical system design, or scientifi
                 <div class="controls-title">FROSTI Ray Tracing</div>
                 <div class="controls-subtitle">Interactive Physics Simulation</div>
             </div>
-            
             <div class="controls-content">
-                <div class="control-section">
-                    <h3>Simulation Controls</h3>
-                    <div class="control-content">
-                        <div class="button-group">
-                            <button id="startBtn">Start Simulation</button>
-                            <button id="resetBtn">Reset</button>
-                            <button id="clearRay">Clear Rays</button> 
+                    <div class="control-section">
+                        <h3>Simulation Controls</h3>
+                        <div class="control-content">
+                            <div class="button-group">
+                                <button id="startBtn">Start Simulation</button>
+                                <button id="resetBtn">Reset</button>
+                                <button id="clearRay">Clear Rays</button> 
+                                <button id="toggleConstraints" class="toggle-on">Constraints: ON</button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="control-section">
-                    <h3>Overlay Controls</h3>
-                    <div class="control-content">
-                        <div class="button-group">
-                            <button id="resetOverlays">Reset Overlays</button>
-                            <button id="toggleKDE">Toggle KDE</button>
-                            <button id="toggleHistogram">Toggle Histogram</button>
-                            <button id="toggleThermalOverlay">Toggle Thermal Overlay</button>
+                    <div class="control-section">
+                        <h3>Overlay Controls</h3>
+                        <div class="control-content">
+                            <div class="button-group">
+                                <button id="resetOverlays">Reset Overlays</button>
+                                <button id="toggleKDE" class="toggle-off">KDE: OFF</button>
+                                <button id="toggleHistogram" class="toggle-off">Histogram: OFF</button>
+                                <button id="toggleThermalOverlay" class="toggle-on">Thermal: ON</button>
+                            </div>
                         </div>
-                    </div>
-                </div>            
+                    </div>   
                 
                 <div class="control-section">
                     <h3>Ray Parameters</h3>
@@ -169,12 +169,12 @@ Perfect for educational physics simulations, optical system design, or scientifi
                         
                         <div class="control-group">
                             <label>Distance from Origin <span class="value" id="dist_sor_tar_Value">50.0 mm</span></label>
-                            <input type="range" id="dist_sor_tar" min="1000" max="10000" step="10" value="7500">
+                            <input type="range" id="dist_sor_tar" min="6000" max="20000" step="10" value="9000">
                         </div>
                 
                         <div class="control-group">
                             <label>Target Width <span class="value" id="targetLengthValue">40.0 mm</span></label>
-                            <input type="range" id="targetLength" min="50" max="8000" step="10" value="4000">
+                            <input type="range" id="targetLength" min="50" max="17000" step="10" value="4000">
                         </div>
 
                         <div class="control-group">
@@ -185,7 +185,7 @@ Perfect for educational physics simulations, optical system design, or scientifi
                 </div>
                 <div class="physics-info">
                     <strong>Description:</strong>
-                    <br>Click 'z' key to see hotkey assignments for the simulation.<br>
+                    <br>Click the 'Esc' key to see hotkey assignments for the simulation.<br>
                     <a href="https://experimentalgravity.ucr.edu/" style="color: #6caffc; text-decoration: none;">Richardson Lab UCR</a><br>
                     <br>FROSTI Ray Tracing</b> is a physics simulation application that allows users to visualize and interact with ray tracing phenomena in a user-friendly interface. The simulation includes various parameters and overlays to enhance the understanding of ray behavior in different scenarios.
                 </div>
@@ -225,11 +225,15 @@ Perfect for educational physics simulations, optical system design, or scientifi
         let animationId = null;
         let frameCount = 0;
 
+        let enableProximityConstraint = false; // Toggle proximity constraint
+        let enableApertureConstraint = false; // Toggle aperture constraint
+
         // Get current values
         let theta, dist_sor_tar, sourceLength, targetLength, verticalOffset;
         let emissionRate, maxBounces, raySpeed, rayLifetime;
         let a, b, z0, voffset;
     </script>
+
     <!-- Load Controls, Unit conversion, and draw background grid -->
     <script src="js/controls-mobile.js"></script>
     <script src="js/unitsGrid.js"></script>
@@ -253,92 +257,10 @@ Perfect for educational physics simulations, optical system design, or scientifi
 
     <!-- Load Other -->
     <script src="js/preformance.js"></script>
+    <script src="js/help.js"></script>
 
     <script>
-        // Hotkey help display
-        let helpVisible = false;
-        let helpElement = null;
-
-        function createHelpDisplay() {
-            if (helpElement) return helpElement;
-            
-            helpElement = document.createElement('div');
-            helpElement.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: rgba(0, 0, 0, 0.8);
-                color: white;
-                padding: 15px;
-                border-radius: 8px;
-                font-family: monospace;
-                font-size: 14px;
-                line-height: 1.4;
-                z-index: 10;
-                white-space: pre-line;
-                border: 2px solid #4a90e2;
-            `;
-            
-            helpElement.textContent = `
-            HOTKEY ASSIGNMENTS:
-
-            Histagram Overlay:
-            r - Reset histogram and KDE
-            h - Toggle histogram 
-
-            KDE Overlay:
-            k - Toggle KDE 
-            n - Increase KDE binwidth
-            m - Decrease KDE binwidth
-            b - change KDE fitting method
-
-            "Heating" Overlay:
-            t - Toggle overlay visibility
-            - - Decrease 'Diffusion' rate (-0.1)
-            + - Increase 'Diffusion' rate (+0.1)
-            [ - Decrease tint strength (-0.1)
-            ] - Increase tint strength (+0.1)
-            < - Decrease something
-            > - Increase something
-            `;
-            
-            document.body.appendChild(helpElement);
-            return helpElement;
-        }
-
-        function toggleHelp() {
-            if (helpVisible) {
-                hideHelp();
-            } else {
-                showHelp();
-            }
-        }
-
-        function showHelp() {
-            if (!helpVisible) {
-                createHelpDisplay();
-                helpElement.style.display = 'block';
-                helpVisible = true;
-            }
-        }
-
-        function hideHelp() {
-            if (helpVisible && helpElement) {
-                helpElement.style.display = 'none';
-                helpVisible = false;
-            }
-        }
-
-        // Simple keyboard controls
-        document.addEventListener('keydown', (e) => {
-            // Show help when H is held
-            if (e.key === 'z' || e.key === 'Z') {
-                toggleHelp();
-                return;
-            }
-        }
-        )
-
+        
         // Update display values on control change
         Object.values(controls).forEach(control => {
             control.addEventListener('input', () => {
@@ -348,7 +270,7 @@ Perfect for educational physics simulations, optical system design, or scientifi
                 }
             });
         });
-        //local
+
         // Initial setup
         updateValues();
         updateZoomInfo();

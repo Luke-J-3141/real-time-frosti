@@ -119,12 +119,32 @@ Uses global variables: zoomLevel, panX, panY, HISTOGRAM_CONFIG
 
 
 // Kernel functions for KDE
+// Can swich between different kernel types with the 'b' key
 const KERNEL_FUNCTIONS = {
     gaussian: (u) => (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * u * u),
     epanechnikov: (u) => Math.abs(u) <= 1 ? 0.75 * (1 - u * u) : 0,
     uniform: (u) => Math.abs(u) <= 1 ? 0.5 : 0,
     triangular: (u) => Math.abs(u) <= 1 ? 1 - Math.abs(u) : 0,
     biweight: (u) => Math.abs(u) <= 1 ? (15/16) * Math.pow(1 - u * u, 2) : 0
+};
+
+// KDE curve overlay system for main canvas
+// Global state for KDE visibility and current parameters
+let kdeVisible = false;
+let currentKDEParams = null;
+
+// Default KDE configuration parameters 
+// These can be modified via setKDEConfig() function
+const KDE_CONFIG = {
+    lineWidth: 2,
+    opacity: 0.8,
+    curveColor: '#dc2626',     // Red color
+    fillColor: 'rgba(220, 38, 38, 0.1)',
+    pointDensity: 300,         // Higher density for smoother curves
+    showFill: true,
+    xOffset: 0,
+    kernelType: 'gaussian',    // Default kernel
+    bandwidth: null            // Auto-calculate if null
 };
 
 // Function to calculate optimal bandwidth using Silverman's rule of thumb
@@ -161,7 +181,7 @@ function calculateOptimalBandwidth(data, weights = null) {
     return Math.max(bandwidth, 0.1); // Ensure minimum bandwidth
 }
 
-// Function to fit KDE to the termination histogram data
+// Function to fit KDE to the termination data
 function fitKDEToTerminationData(kernelType = 'gaussian', bandwidth = null) {
     const stats = getTerminationStats();
     
@@ -277,26 +297,11 @@ function findKDEModes(kdeParams, yMin = -100, yMax = 100, resolution = 1000) {
     return modes;
 }
 
-// KDE curve overlay system for main canvas
-let kdeVisible = false;
-let currentKDEParams = null;
-
-const KDE_CONFIG = {
-    lineWidth: 2,
-    opacity: 0.8,
-    curveColor: '#dc2626',     // Red color
-    fillColor: 'rgba(220, 38, 38, 0.1)',
-    pointDensity: 300,         // Higher density for smoother curves
-    showFill: true,
-    xOffset: 0,
-    kernelType: 'gaussian',    // Default kernel
-    bandwidth: null            // Auto-calculate if null
-};
-
 // Draw KDE curve on the main canvas
 function drawKDEOnCanvas(ctx, stats) {
     
-    if (!kdeVisible || !currentKDEParams) return;
+    if (!kdeVisible ) return;
+   
        
     const canvasHeight = ctx.canvas.height;
     const canvasWidth = ctx.canvas.width;
@@ -323,6 +328,7 @@ function drawKDEOnCanvas(ctx, stats) {
     // Generate KDE curve points
     const yMin = minY - padding;
     const yMax = maxY + padding;
+    currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
     const kdePoints = generateKDECurve(currentKDEParams, yMin, yMax, KDE_CONFIG.pointDensity);
     
     if (kdePoints.length === 0) {
@@ -338,6 +344,7 @@ function drawKDEOnCanvas(ctx, stats) {
     ctx.strokeStyle = KDE_CONFIG.curveColor;
     ctx.lineWidth = KDE_CONFIG.lineWidth / zoomLevel;
     ctx.globalAlpha = KDE_CONFIG.opacity;
+    
     
     // Draw filled area under curve
     if (KDE_CONFIG.showFill) {
@@ -381,9 +388,9 @@ function toggleKDE() {
         currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
     }
 }
- 
+
+// Reset KDE parameters with out hiding the overlay
 function resetKDE() {
-    kdeVisible = false;
     currentKDEParams = null;
     KDE_CONFIG.bandwidth = null; // Reset to auto-calculate
 }
@@ -393,31 +400,4 @@ function setKDEConfig(config) {
     Object.assign(KDE_CONFIG, config);
     currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);     
 }
-
-// Enhanced keyboard controls for KDE (add to existing event listener)
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'k' || e.key === 'K') {
-        toggleKDE();
-    } else if (e.key === 'b' || e.key === 'B') {
-        // Cycle through different kernels
-        const kernels = Object.keys(KERNEL_FUNCTIONS);
-        const currentIndex = kernels.indexOf(KDE_CONFIG.kernelType);
-        const nextIndex = (currentIndex + 1) % kernels.length;
-        KDE_CONFIG.kernelType = kernels[nextIndex];
-        currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
-        console.log('KDE kernel changed to:', KDE_CONFIG.kernelType);
-    } else if (e.key === 'n' || e.key === 'N') {
-        // Adjust bandwidth
-        const currentBandwidth = currentKDEParams ? currentKDEParams.bandwidth : 1;
-        KDE_CONFIG.bandwidth = currentBandwidth * 1.2; // Increase by 20%
-        currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
-        console.log('KDE bandwidth increased to:', KDE_CONFIG.bandwidth.toFixed(3));
-    } else if (e.key === 'm' || e.key === 'M') {
-        // Decrease bandwidth
-        const currentBandwidth = currentKDEParams ? currentKDEParams.bandwidth : 1;
-        KDE_CONFIG.bandwidth = currentBandwidth * 0.8; // Decrease by 20%
-        currentKDEParams = fitKDEToTerminationData(KDE_CONFIG.kernelType, KDE_CONFIG.bandwidth);
-        console.log('KDE bandwidth decreased to:', KDE_CONFIG.bandwidth.toFixed(3));
-    }
-});
 

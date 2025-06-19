@@ -129,7 +129,6 @@ function deleteRays(ray){
     if (ray.x > z0 / 2 && isOutsideAperture(ray.x, ray.y)) {
         ray.active = false;
     }
-        
 }
 
 function isOutsideAperture(x, y) {
@@ -152,18 +151,14 @@ function isOutsideAperture(x, y) {
     return !insideUpper && !insideLower;
 }
 
-// TODO add proximity constraints 
-
 // Only Draw reflectors and calculate reflection if ellipse is above constraint
 // On toggle so can see with or without
 function isaboveProximity() {
-    const y_proximity = 600; // Distance from TM for proximity
+    const x_proximity = 60 * PIXELS_PER_MM; // Distance from TM for proximity
+    const y_proximity = 163 * PIXELS_PER_MM;
 
-    
-}
-
-function isaboveAperture() {
-    const x_proximity = 1630; // Distance for aperture
-
-
+    return {
+        x: x_proximity,
+        y: y_proximity
+    };
 }

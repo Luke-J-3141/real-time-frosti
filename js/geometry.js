@@ -71,6 +71,7 @@
 // <====== Comments ======>
 // TODO:
 
+
 // Improved ellipse intersection with better edge case handling
 function checkEllipseIntersection(ray) {
     const { ht, hl, kt, kl, ct, cl, dt, dl, phit, phil } = getEllipseConstants();
@@ -79,6 +80,9 @@ function checkEllipseIntersection(ray) {
     const upperMaskLine = getEllipseMaskLine("upper");
     const lowerMaskLine = getEllipseMaskLine("lower");
     
+    // Get proximity constraints
+    const proximityLimits = isaboveProximity();
+    
     // Check both ellipses and return the closest valid intersection
     const intersections = [];
     
@@ -86,20 +90,30 @@ function checkEllipseIntersection(ray) {
     const upperResult = checkSingleEllipseIntersection(ray, ht, kt, ct, dt, phit, upperMaskLine, "Upper");
     
     if (upperResult) {
-        intersections.push({...upperResult});
+        // Apply constraints if enabled
+        const meetProximityConstraint = enableProximityConstraint || upperResult.x >= proximityLimits.x;
+        const meetApertureConstraint = enableApertureConstraint || upperResult.y >= proximityLimits.y;
+        
+        if (meetProximityConstraint && meetApertureConstraint) {
+            intersections.push({...upperResult});
+        }
     }
     
     // Check lower ellipse
-    
     const lowerResult = checkSingleEllipseIntersection(ray, hl, kl, cl, dl, phil, lowerMaskLine, "Lower");
     
     if (lowerResult) {
-        intersections.push({...lowerResult});
+        // Apply constraints if enabled
+        const meetProximityConstraint =  enableProximityConstraint || lowerResult.x >= proximityLimits.x;
+        const meetApertureConstraint = enableApertureConstraint || lowerResult.y >= proximityLimits.y;
+        
+        if (meetProximityConstraint && meetApertureConstraint) {
+            intersections.push({...lowerResult});
+        }
     }
     
     // Return closest intersection if any
     if (intersections.length === 0) return null;
-    
     
     // Sort by distance and return closest
     intersections.sort((a, b) => a.distance - b.distance);
@@ -222,6 +236,7 @@ function findEllipseIntersection(ray, h, k, a, b, phi) {
     
     return { x: intX, y: intY, t: bestT, distance: bestDistance };
 }
+
 // Convert slope-intercept form to standard line equation (ax + by + c = 0)
 function getEllipseMaskLine(ellipseType) {
     const { slopet, slopel, interseptt, interseptl } = getEllipseConstants();
@@ -306,6 +321,7 @@ function isPointWithinMask(x, y, maskLine, ellipse) {
     return true;
 }
 
+// 
 function calculateEllipseNormal(x, y, h, k, a, b, phi) {
     // Transform point to ellipse coordinate system
     const dx = x - h;
@@ -343,7 +359,6 @@ function calculateEllipseNormal(x, y, h, k, a, b, phi) {
     
     return { x: worldNormalX, y: worldNormalY };
 }
-
 
 function getEllipseConstants() {
     
