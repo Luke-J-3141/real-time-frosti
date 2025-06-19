@@ -22,31 +22,36 @@ function createHelpDisplay() {
         border: 2px solid #4a90e2;
     `;
     
+
     helpElement.textContent = `
         HOTKEY ASSIGNMENTS:
 
-        Overlay:
-        R - Reset all Overlays
+        General:
+        R - Reset all overlays
+        C - Toggle constraints (ON/OFF)
+
+        Overlays:
         H - Toggle histogram 
-        T - Toggle thermal overlay
         K - Toggle KDE overlay
+        T - Toggle thermal overlay
 
-        Controls for KDE Overlay:
-        N - Increase KDE binwidth
-        M - Decrease KDE binwidth
-        B - change KDE fitting method
+        < - - ADVANCED Controls - - >
+        KDE Controls:
+        B - Cycle through KDE kernel types
+        N - Increase KDE bandwidth (+20%)
+        M - Decrease KDE bandwidth (-20%)
 
-        Controls for Thermal Overlay:
-        - - Decrease 'Diffusion' rate (-0.1)
-        + - Increase 'Diffusion' rate (+0.1)
-        [ - Decrease tint strength (-0.1)
-        ] - Increase tint strength (+0.1)
-        < - Decrease something
-        > - Increase something
-        O - 
-        P - 
+        Thermal Overlay Controls:
+        - - Decrease diffusion rate (-0.1)
+        + - Increase diffusion rate (+0.1)
+        [ - Decrease heat decay rate (-0.05)
+        ] - Increase heat decay rate (+0.05)
+        < - Decrease range growth rate (-1.0)
+        > - Increase range growth rate (+1.0)
+        O - Decrease heat transparency (-0.1)
+        P - Increase heat transparency (+0.1)
     `;
-    
+        
     document.body.appendChild(helpElement);
     return helpElement;
 }

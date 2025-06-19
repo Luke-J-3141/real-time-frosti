@@ -124,7 +124,6 @@ PERFORMANCE IMPACT:
 
 
 // performance.js - Performance monitoring for FROSTI Ray Tracing
-// Currently disabled remove false && from event listener to enable
 class PerformanceMonitor {
     constructor() {
         this.enabled = false;
@@ -179,7 +178,7 @@ class PerformanceMonitor {
     
     bindHotkeys() {
         document.addEventListener('keydown', (e) => {
-            if (false && e.key === 'p' || e.key === 'P') {
+            if (e.key === 'Escape') {
                 this.toggle();
             }
         });
@@ -198,7 +197,7 @@ class PerformanceMonitor {
         this.overlay.style.display = 'block';
         this.timers.lastFrame = performance.now();
         this.updateInterval = setInterval(() => this.updateDisplay(), 100);
-        console.log('Performance monitor started - Press P to toggle');
+        console.log('Performance monitor started - Press "Esc" to toggle');
     }
     
     stop() {
@@ -358,7 +357,7 @@ class PerformanceMonitor {
             html += `<span style="color: #ff0000;">● CRITICAL</span><br>`;
         }
         
-        html += `<br><div style="color: #888; font-size: 10px;">Press P to toggle</div>`;
+        html += `<br><div style="color: #888; font-size: 10px;">Press "Esc" to toggle</div>`;
         
         this.overlay.innerHTML = html;
     }
